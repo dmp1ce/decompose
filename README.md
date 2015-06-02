@@ -18,7 +18,7 @@ Scratch pad for ideas about what decompose should become
 
 #### proposed vocabulary
 
-To keep things fun, lets try to stick with a them of natural decomposition
+To keep things fun, lets try to stick with a theme of natural decomposition
 
 - Index of framework templates <=> ecosphere (or world)
 - framework template <=> environment
