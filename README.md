@@ -30,8 +30,8 @@ The idea is that *ecospheres* contain several different *environments*. In *envi
 
 #### proposed libraries to use
 
-Dyre (for configuring program)
-Turtle (for creating shell scripts)
-Shake (for make functionilty)
-hastache (for template engine)
-optparse-applicative (for command line arguments)
+- Dyre (for configuring program)
+- Turtle (for creating shell scripts)
+- Shake (for make functionilty)
+- hastache (for template engine)
+- optparse-applicative (for command line arguments)
