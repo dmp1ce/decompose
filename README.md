@@ -27,3 +27,11 @@ To keep things fun, lets try to stick with a theme of natural decomposition
 - sub command <=> process
 
 The idea is that *ecospheres* contain several different *environments*. In *environments* *organisms* exist which are broken down by the *elements*. Hence, we have *organisms* in *environments* which *decompose* from different *elemental* *processes*.
+
+#### proposed libraries to use
+
+Dyre (for configuring program)
+Turtle (for creating shell scripts)
+Shake (for make functionilty)
+hastache (for template engine)
+optparse-applicative (for command line arguments)
