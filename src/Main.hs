@@ -4,17 +4,56 @@
 import Control.Monad
 import Language.Haskell.Interpreter
 import Turtle
+import Options.Applicative
+import Control.Applicative
 
 main :: IO ()
-main = do
+main = execParser opts >>= decompose
+  where
+    opts = info (helper <*> options)
+      ( fullDesc
+     <> progDesc "Print a greeting for TARGET"
+     <> header "hello - a test for optparse-applicative" ) 
+
+
+decompose :: Options -> IO ()
+decompose (Options (Just h) False m) = putStrLn $ "Hello, " ++ h
+decompose (Options Nothing False m) = putStrLn $ "Optional string missing"
+decompose _ = do
   echo "List help here..."
   r <- runInterpreter testHint
   case r of
     Left err -> printInterpreterError err
     Right () -> putStrLn "that's all folks"
+--decompose _ = return ()
 --main = do                           --
 --    echo "Line 1"                   -- echo Line 1
 --    echo "Line 2"                   -- echo Line 2
+
+
+data Options = Options
+  { hello :: Maybe String
+  , quiet :: Bool
+  , more :: String }
+
+-- equivalent to: optional . strOption
+optionalStrOption :: Mod OptionFields String -> Parser (Maybe String)
+optionalStrOption flags = Just <$> strOption flags <|> pure Nothing
+
+options :: Parser Options
+options = Options
+--     <$> strOption
+     <$> optionalStrOption
+         ( long "hello"
+        <> metavar "TARGET"
+        <> help "Target for the greeting" )
+     <*> switch
+         ( long "quiet"
+        <> help "Whether to be quiet" )
+     <*> strOption
+         ( long "more"
+        <> metavar "TARGET"
+        <> help "Target for the more" )
 
 -- observe that Interpreter () is an alias for InterpreterT IO ()
 testHint :: Interpreter ()
