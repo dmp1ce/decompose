@@ -2,4 +2,38 @@
 #
 # decompose
 
-echo "Starting decompose"
+# Parse parameters and run the correct command.
+#
+# Parameters:
+#   $1: decompose parameters
+decompose-parse-parameters() {
+  case $1 in
+    "--init")
+      decompose-init $2
+      ;;
+    "--help")
+      decompose-print-help
+      ;;
+    *)
+      echo "Unkown parameter '$1'"
+      decompose-print-help
+      ;;
+  esac
+}
+
+decompose-print-help() {
+  echo "Printing help"
+}
+
+# Initialize environment
+#
+# Paramaters:
+#   $1: environment to initialize
+decompose-init() {
+  echo "Initializing environment '$1'"
+  mkdir ".decompose"
+}
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+decompose-parse-parameters "$@"
