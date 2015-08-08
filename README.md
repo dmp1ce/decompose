@@ -2,7 +2,9 @@
 
 ## Description
 
-Decompose is a wrapper for the Docker Compose application. The purpose is to provide a development environment templates, variables and commands for running specific frameworks.
+Decompose is a templating framework to help developers switch environments. Decompose provides development environment templates, custom variables and commands.
+
+"Don't kill yourself trying to manage various environments!"
 
 ### Development Notes
 
@@ -22,7 +24,7 @@ To keep things fun, lets try to stick with a theme of natural decomposition
 
 - Index of framework templates <=> ecosphere (or world)
 - framework template <=> environment
-- template file <=> organism (the extension can be .org)
+- template file <=> organism undergoing rigor (mo)rtis (the extension can be .mo which is the extension for bash mustache (mo))
 - variable used by the templates <=> element
 - sub command <=> process
 
