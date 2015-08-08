@@ -1,0 +1,5 @@
+#!/bin/bash
+#
+# decompose
+
+echo "Starting decompose"
