@@ -14,6 +14,9 @@ decompose-parse-parameters() {
     "--help")
       decompose-print-help
       ;;
+    "--list-environments")
+      decompose-list-environments
+      ;;
     *)
       echo "Unkown parameter '$1'"
       decompose-print-help
@@ -21,8 +24,12 @@ decompose-parse-parameters() {
   esac
 }
 
+# Print help
 decompose-print-help() {
-  echo "Printing help"
+  cat <<HELP_EOF
+Printing help
+HELP_EOF
+  echo "help"
 }
 
 # Initialize environment
@@ -30,8 +37,68 @@ decompose-print-help() {
 # Paramaters:
 #   $1: environment to initialize
 decompose-init() {
+  # Is environment created already?
+  if [ -d ".decompose" ]; then
+    echo "Environment already exists"
+    return 1
+  fi
+
   echo "Initializing environment '$1'"
   mkdir ".decompose"
+
+  # Create environments file
+  cat <<ENV_FILE > ".decompose/environments"
+# Define locations of environments
+# DECOMPOSE_ENVIRONMENTS=(
+# 'https://myserver.com/repo.git'
+# )
+ENV_FILE
+}
+
+# List environments
+decompose-list-environments() {
+  echo "List environments"
+  decompose-collect-configuration
+}
+
+# Collect decompose configuration
+decompose-collect-configuration() {
+  # Is .decompose environments available?
+  decompose-find-decompose-directory decompose_directory
+  echo $decompose_directory
+  if [ ! "$decompose_directory" ]; then
+    echo "Environment missing"
+    return 1
+  fi
+
+  . "$decompose_directory/environments"
+
+  testme
+}
+
+testme() {
+  echo $DECOMPOSE_ENVIRONMENTS
+}
+
+# Finds the decompose directory in parents
+#
+# Parameters:
+#   $1: return value to set decompose directory to
+decompose-find-decompose-directory() {
+  current_dir=$(realpath .)
+  while [[ ! -d "$current_dir/.decompose" && "$current_dir" != "/" ]]; do
+    current_dir=$(realpath $current_dir/../)
+  done
+
+  # We hit the end. See if we found .decompose
+  if [ -d "$current_dir/.decompose" ]; then
+    eval "$1=$current_dir/.decompose"
+    return 0
+  fi
+
+  # I guess we didn't find .decompose
+  echo "Didn't find .decompose"
+  return 1
 }
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
