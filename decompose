@@ -39,18 +39,19 @@ HELP_EOF
 decompose-init() {
   # Is environment created already?
   if [ -d ".decompose" ]; then
-    echo "Environment already exists"
+    echo "Ecosphere already exists"
     return 1
   fi
 
-  echo "Initializing environment '$1'"
+  echo "Initializing ecosphere"
   mkdir ".decompose"
 
   # Create environments file
-  cat <<ENV_FILE > ".decompose/environments"
-# Define locations of environments
-# DECOMPOSE_ENVIRONMENTS=(
-# 'https://myserver.com/repo.git'
+  cat <<ENV_FILE > ".decompose/ecosphere"
+# Define ecosphere
+# declare -A DECOMPOSE_ECOSPHERE
+# DECOMPOSE_ECOSPHERE=(
+# [example]='https://github.com/dmp1ce/decompose-example-environments.git'
 # )
 ENV_FILE
 }
@@ -65,19 +66,19 @@ decompose-list-environments() {
 decompose-collect-configuration() {
   # Is .decompose environments available?
   decompose-find-decompose-directory decompose_directory
-  echo $decompose_directory
   if [ ! "$decompose_directory" ]; then
     echo "Environment missing"
     return 1
   fi
 
-  . "$decompose_directory/environments"
+  . "$decompose_directory/ecosphere"
 
-  testme
-}
-
-testme() {
-  echo $DECOMPOSE_ENVIRONMENTS
+  # Print all the environment indexes
+  for environment in "${!DECOMPOSE_ECOSPHERE[@]}"
+  do
+    # Get a directory listing of each index to see all of the possibilities
+    echo "$environment : ${DECOMPOSE_ECOSPHERE[$environment]}"
+  done
 }
 
 # Finds the decompose directory in parents
