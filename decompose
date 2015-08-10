@@ -71,6 +71,7 @@ decompose-init() {
 
   # Copy files from clone to .decompose
   # Is environment created already?
+  local decompose_directory
   decompose-find-decompose-directory decompose_directory
   if [ -d "$decompose_directory" ]; then
     echo ".decompose directory already exists here:"
@@ -92,7 +93,29 @@ ENV_FILE
   cp -r $decompose_data_dir/ecosphere/$environment_name/* .decompose/environment
 
   # Copy skeleton to working directory
-  cp -r .decompose/environment/skel/* ./
+  cp -r .decompose/environment/skel/. ./
+}
+
+# Load environment settings
+decompose-load-environment-settings() {
+  local decompose_directory
+  decompose-find-decompose-directory decompose_directory
+
+  . $decompose_directory/environment_settings
+}
+
+# Updates decompose environment
+decompose-update-environment() {
+  decompose-load-environment-settings
+  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local decompose_directory
+  decompose-find-decompose-directory decompose_directory
+  # Update git repository
+  git -C "$decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME" pull
+
+  # Update environment
+  cp -r $decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME/* \
+$decompose_directory/environment
 }
 
 # Finds the decompose directory in parents
