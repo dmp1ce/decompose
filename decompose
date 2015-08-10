@@ -67,8 +67,7 @@ HELP_EOF
     echo -e "\nEnvironment commands:\n"
 
     . $decompose_directory/environment/processes
-    for p in "${DECOMPOSE_PROCESSES[@]}"
-    do
+    for p in "${DECOMPOSE_PROCESSES[@]}"; do
       echo "$p"
       "$p"_help
     done
@@ -179,11 +178,35 @@ decompose-project-root() {
 
 # Create/collect configuration where necessary
 decompose-bootstrap() {
+  # Verify dependencies
+  decompose-verify-dependencies
+  if [ "$?" -ne "0" ]; then
+    echo "Please install missing dependencies"
+    exit 1
+  fi
+
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
   # Create ecosphere
   if [ ! -d "$decompose_data_dir/ecosphere" ]; then
     mkdir -p "$decompose_data_dir/ecosphere"
   fi
+}
+
+# Print dependencies that are missing
+decompose-verify-dependencies() {
+  local return_code
+  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath')
+
+  for check in ${checks[@]}; do
+    which $check >/dev/null 2>&1
+    if [ "$?" -ne "0" ]; then
+      echo "'$check' command is missing"
+      return_code=1
+      if [ "$check" == "which" ]; then break; fi
+    fi
+  done
+
+  return $return_code
 }
 
 # Print version
