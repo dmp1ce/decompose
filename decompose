@@ -36,7 +36,7 @@ decompose-parse-parameters() {
         done
       fi
 
-      echo "Unkown parameter '$1'"
+      echo "Unknown parameter '$1'"
       decompose-print-help
       ;;
   esac
