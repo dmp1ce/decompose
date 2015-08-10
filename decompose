@@ -9,13 +9,13 @@
 decompose-parse-parameters() {
   case $1 in
     "--init")
-      decompose-init $2
+      decompose-init $2 $3
+      ;;
+    "--update")
+      decompose-update-environment
       ;;
     "--help")
       decompose-print-help
-      ;;
-    "--list-environments")
-      decompose-list-environments
       ;;
     *)
       echo "Unkown parameter '$1'"
@@ -27,66 +27,75 @@ decompose-parse-parameters() {
 # Print help
 decompose-print-help() {
   cat <<HELP_EOF
-Printing help
+decompose - Development Environment Helper
+
+Core commands:
+
+--init <git_url> <environment_name>
+  Initialize an environment from a git URL and name
+--update
+  Update the current environment
+--help
+  This message
 HELP_EOF
-  echo "help"
 }
 
 # Initialize environment
 #
 # Paramaters:
-#   $1: environment to initialize
+#   $1: environment url
+#   $2: environment name
 decompose-init() {
-  # Is environment created already?
-  if [ -d ".decompose" ]; then
-    echo "Ecosphere already exists"
-    return 1
+  local environment_url=$1
+  local environment_name=$2
+
+  # Is $nvironment parameter valid?
+  if [ -z "$environment_url" ]; then
+    echo "Please supply an environment url to initialize"
+    exit 1
   fi
 
-  echo "Initializing ecosphere"
+  if [ -z "$environment_name" ]; then
+    echo "Please supply an environment name to initialize"
+    exit 1
+  fi
+
+  # Clone the environment
+  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  git clone $environment_url $decompose_data_dir/ecosphere/$environment_name
+
+  # Copy files from clone to .decompose
+  # Is environment created already?
+  decompose-find-decompose-directory decompose_directory
+  if [ -d "$decompose_directory" ]; then
+    echo ".decompose directory already exists here:"
+    echo "$decompose_directory"
+    exit 1
+  fi
+
+  echo "Initializing environment"
   mkdir ".decompose"
 
-  # Create environments file
-  cat <<ENV_FILE > ".decompose/ecosphere"
-# Define ecosphere
-# declare -A DECOMPOSE_ECOSPHERE
-# DECOMPOSE_ECOSPHERE=(
-# [example]='https://github.com/dmp1ce/decompose-example-environments.git'
-# )
+  # Save decompose environment
+  cat <<ENV_FILE > ".decompose/environment_settings"
+DECOMPOSE_ENVIRONMENT_URL=$environment_url
+DECOMPOSE_ENVIRONMENT_NAME=$environment_name
 ENV_FILE
-}
 
-# List environments
-decompose-list-environments() {
-  echo "List environments"
-  decompose-collect-configuration
-}
+  # Copy environment files
+  mkdir ".decompose/environment"
+  cp -r $decompose_data_dir/ecosphere/$environment_name/* .decompose/environment
 
-# Collect decompose configuration
-decompose-collect-configuration() {
-  # Is .decompose environments available?
-  decompose-find-decompose-directory decompose_directory
-  if [ ! "$decompose_directory" ]; then
-    echo "Environment missing"
-    return 1
-  fi
-
-  . "$decompose_directory/ecosphere"
-
-  # Print all the environment indexes
-  for environment in "${!DECOMPOSE_ECOSPHERE[@]}"
-  do
-    # Get a directory listing of each index to see all of the possibilities
-    echo "$environment : ${DECOMPOSE_ECOSPHERE[$environment]}"
-  done
+  # Copy skeleton to working directory
+  cp -r .decompose/environment/skel/* ./
 }
 
 # Finds the decompose directory in parents
 #
 # Parameters:
-#   $1: return value to set decompose directory to
+#   $1: return value (decompose directory location)
 decompose-find-decompose-directory() {
-  current_dir=$(realpath .)
+  local current_dir=$(realpath .)
   while [[ ! -d "$current_dir/.decompose" && "$current_dir" != "/" ]]; do
     current_dir=$(realpath $current_dir/../)
   done
@@ -94,14 +103,19 @@ decompose-find-decompose-directory() {
   # We hit the end. See if we found .decompose
   if [ -d "$current_dir/.decompose" ]; then
     eval "$1=$current_dir/.decompose"
-    return 0
   fi
 
   # I guess we didn't find .decompose
-  echo "Didn't find .decompose"
-  return 1
 }
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Create/collect configuration where necessary
+decompose-bootstrap() {
+  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  # Create ecosphere
+  if [ ! -d "$decompose_data_dir/ecosphere" ]; then
+    mkdir -p "$decompose_data_dir/ecosphere"
+  fi
+}
 
+decompose-bootstrap
 decompose-parse-parameters "$@"
