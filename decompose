@@ -14,6 +14,9 @@ decompose-parse-parameters() {
     "--update")
       decompose-update-environment
       ;;
+    "--version")
+      decompose-version
+      ;;
     "--help")
       decompose-print-help
       ;;
@@ -35,6 +38,8 @@ Core commands:
   Initialize an environment from a git URL and name
 --update
   Update the current environment
+--version
+  Print version
 --help
   This message
 HELP_EOF
@@ -115,6 +120,12 @@ decompose-bootstrap() {
   if [ ! -d "$decompose_data_dir/ecosphere" ]; then
     mkdir -p "$decompose_data_dir/ecosphere"
   fi
+}
+
+# Print version
+decompose-version() {
+  local version="0.1"
+  echo "decompose v$version"
 }
 
 decompose-bootstrap
