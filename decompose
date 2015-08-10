@@ -21,6 +21,21 @@ decompose-parse-parameters() {
       decompose-print-help
       ;;
     *)
+      # Go through all environment commands
+      local decompose_directory
+      decompose-find-decompose-directory decompose_directory
+
+      if [ -f $decompose_directory/environment/processes ]; then
+        . $decompose_directory/environment/processes
+        for p in "${DECOMPOSE_PROCESSES[@]}"
+        do
+          if [ "$1" == "$p" ]; then
+            $p "${@:2}"
+            exit 0
+          fi
+        done
+      fi
+
       echo "Unkown parameter '$1'"
       decompose-print-help
       ;;
@@ -43,6 +58,21 @@ Core commands:
 --help
   This message
 HELP_EOF
+
+  # Go through all environment commands
+  local decompose_directory
+  decompose-find-decompose-directory decompose_directory
+
+  if [ -f $decompose_directory/environment/processes ]; then
+    echo -e "\nEnvironment commands:\n"
+
+    . $decompose_directory/environment/processes
+    for p in "${DECOMPOSE_PROCESSES[@]}"
+    do
+      echo "$p"
+      "$p"_help
+    done
+  fi
 }
 
 # Initialize environment
@@ -134,6 +164,17 @@ decompose-find-decompose-directory() {
   fi
 
   # I guess we didn't find .decompose
+}
+
+# Returns the project root directory
+#
+# Parameters:
+#   $1: return value (project root location)
+decompose-project-root() {
+  local decompose_directory
+  decompose-find-decompose-directory decompose_directory
+
+  eval "$1=$(realpath $decompose_directory/../)"
 }
 
 # Create/collect configuration where necessary
