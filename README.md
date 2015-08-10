@@ -4,7 +4,7 @@
 
 Decompose is a templating framework to help developers switch environments. Decompose provides development environment templates, custom variables and commands.
 
-"Don't kill yourself trying to manage various environments!"
+"Don't decompose trying to manage various environments!"
 
 ### Development Notes
 
