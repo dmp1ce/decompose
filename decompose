@@ -140,7 +140,9 @@ decompose-load-elements() {
 
   # Load default settings and then overrides
   . $decompose_directory/environment/elements
-  . $decompose_directory/elements
+  if [ -e $decompose_directory/elements ]; then
+    . $decompose_directory/elements
+  fi
 }
 
 # Updates decompose environment
@@ -153,6 +155,9 @@ decompose-update-environment() {
   git -C "$decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME" pull
 
   # Update environment
+  if [ -n $decompose_directory ]; then
+    rm -r $decompose_directory/environment/*
+  fi
   cp -r $decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME/* \
 $decompose_directory/environment
 }
