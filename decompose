@@ -163,7 +163,9 @@ decompose-build() {
   # Find all .mo files
   local project_root
   decompose-project-root project_root
-  local templates=( $(find $project_root -name "*.mo") )
+  local templates=(
+    $(find $project_root -path "$project_root/.decompose" -prune -o -name "*.mo" -print)
+  )
 
   # Get elements
   decompose-load-elements
@@ -171,6 +173,8 @@ decompose-build() {
   # Process .mo files
   for t in ${templates[@]}; do
     cat $t | . $(which mo) > ${t%.*}
+    chmod --reference $t ${t%.*}
+    echo "$t -> ${t%.*}"
   done
 }
 
@@ -222,7 +226,8 @@ decompose-bootstrap() {
 # Print dependencies that are missing
 decompose-verify-dependencies() {
   local return_code
-  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find')
+  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
+    'chmod')
 
   for check in ${checks[@]}; do
     which $check >/dev/null 2>&1
