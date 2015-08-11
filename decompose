@@ -9,7 +9,7 @@
 decompose-parse-parameters() {
   case $1 in
     "--init")
-      decompose-init $2 $3;;
+      decompose-init-command $2 $3;;
     "--update")
       decompose-update-environment;;
     "--build")
@@ -64,7 +64,7 @@ HELP_EOF
   decompose-find-decompose-directory decompose_directory
 
   if [ -f $decompose_directory/environment/processes ]; then
-    echo -e "\nEnvironment commands:\n"
+    echo -e "\nEnvironment processes:\n"
 
     . $decompose_directory/environment/processes
     for p in "${DECOMPOSE_PROCESSES[@]}"; do
@@ -74,24 +74,24 @@ HELP_EOF
   fi
 }
 
-# Initialize environment
+# Initialize the environment (.decompose directory)
 #
 # Paramaters:
 #   $1: environment url
 #   $2: environment name
-decompose-init() {
+decompose-init-environment() {
   local environment_url=$1
   local environment_name=$2
 
-  # Is $nvironment parameter valid?
+  # Is environment parameter valid?
   if [ -z "$environment_url" ]; then
     echo "Please supply an environment url to initialize"
-    exit 1
+    return 1
   fi
 
   if [ -z "$environment_name" ]; then
     echo "Please supply an environment name to initialize"
-    exit 1
+    return 1
   fi
 
   # Clone the environment
@@ -120,6 +120,36 @@ ENV_FILE
   # Copy environment files
   mkdir ".decompose/environment"
   cp -r $decompose_data_dir/ecosphere/$environment_name/* .decompose/environment
+}
+
+# Initialize environment command
+#
+# Paramaters:
+#   $1: environment url
+#   $2: environment name
+decompose-init-command() {
+  local environment_url=$1
+  local environment_name=$2
+
+  # Is environment parameter valid?
+  if [ -z "$environment_url" ]; then
+    echo "Please supply an environment url to initialize"
+    exit 1
+  fi
+
+  if [ -z "$environment_name" ]; then
+    echo "Please supply an environment name to initialize"
+    exit 1
+  fi
+
+  # Create environment
+  decompose-init-environment $environment_url $environment_name
+
+  # If error occured then quit
+  if [ "$?" -gt "0" ]; then
+    echo "Error occured initializing environment"
+    exit 1
+  fi
 
   # Copy skeleton to working directory
   cp -r .decompose/environment/skel/. ./
@@ -129,6 +159,11 @@ ENV_FILE
 decompose-load-environment-settings() {
   local decompose_directory
   decompose-find-decompose-directory decompose_directory
+
+  # If .decompose is missing then return error code.
+  if [ "$?" -gt "0"  ]; then
+    return 1
+  fi
 
   . $decompose_directory/environment_settings
 }
@@ -148,6 +183,26 @@ decompose-load-elements() {
 # Updates decompose environment
 decompose-update-environment() {
   decompose-load-environment-settings
+
+  # If settings failed to load then look for .decompose-init
+  if [ "$?" -gt "0" ]; then
+    if [ -e ".decompose-init" ]; then
+      local environment_url=$(cat ".decompose-init")
+
+      local environment_url_tmp=${environment_url%.*}
+      local environment_name=${environment_url_tmp##*/}
+
+      # Initialize .decompose
+      decompose-init-environment $environment_url $environment_name
+
+      return "$?"
+    fi
+
+    echo -n "Missing '.decompose/environment_settings' directory or "
+    echo "'.decompose-init' file"
+    return 1;
+  fi
+
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
   local decompose_directory
   decompose-find-decompose-directory decompose_directory
@@ -196,9 +251,11 @@ decompose-find-decompose-directory() {
   # We hit the end. See if we found .decompose
   if [ -d "$current_dir/.decompose" ]; then
     eval "$1=$current_dir/.decompose"
+    return 0
   fi
 
   # I guess we didn't find .decompose
+  return 1
 }
 
 # Returns the project root directory
