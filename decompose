@@ -9,17 +9,15 @@
 decompose-parse-parameters() {
   case $1 in
     "--init")
-      decompose-init $2 $3
-      ;;
+      decompose-init $2 $3;;
     "--update")
-      decompose-update-environment
-      ;;
+      decompose-update-environment;;
+    "--build")
+      decompose-build;;
     "--version")
-      decompose-version
-      ;;
+      decompose-version;;
     "--help")
-      decompose-print-help
-      ;;
+      decompose-print-help;;
     *)
       # Go through all environment commands
       local decompose_directory
@@ -53,6 +51,8 @@ Core commands:
   Initialize an environment from a git URL and name
 --update
   Update the current environment
+--build
+  Build project files from templates
 --version
   Print version
 --help
@@ -133,6 +133,16 @@ decompose-load-environment-settings() {
   . $decompose_directory/environment_settings
 }
 
+# Load elements
+decompose-load-elements() {
+  local decompose_directory
+  decompose-find-decompose-directory decompose_directory
+
+  # Load default settings and then overrides
+  . $decompose_directory/environment/elements
+  . $decompose_directory/elements
+}
+
 # Updates decompose environment
 decompose-update-environment() {
   decompose-load-environment-settings
@@ -145,6 +155,23 @@ decompose-update-environment() {
   # Update environment
   cp -r $decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME/* \
 $decompose_directory/environment
+}
+
+# Build project files from templates
+decompose-build() {
+  echo "Building project files from templates"
+  # Find all .mo files
+  local project_root
+  decompose-project-root project_root
+  local templates=( $(find $project_root -name "*.mo") )
+
+  # Get elements
+  decompose-load-elements
+
+  # Process .mo files
+  for t in ${templates[@]}; do
+    cat $t | . $(which mo) > ${t%.*}
+  done
 }
 
 # Finds the decompose directory in parents
@@ -195,7 +222,7 @@ decompose-bootstrap() {
 # Print dependencies that are missing
 decompose-verify-dependencies() {
   local return_code
-  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath')
+  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find')
 
   for check in ${checks[@]}; do
     which $check >/dev/null 2>&1
