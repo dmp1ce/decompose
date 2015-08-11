@@ -43,7 +43,7 @@ decompose-parse-parameters() {
 # Print help
 decompose-print-help() {
   cat <<HELP_EOF
-decompose - Development Environment Helper
+decompose - Development Environment Compose
 
 Core commands:
 
