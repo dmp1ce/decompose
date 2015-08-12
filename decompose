@@ -28,6 +28,7 @@ decompose-parse-parameters() {
         for p in "${DECOMPOSE_PROCESSES[@]}"
         do
           if [ "$1" == "$p" ]; then
+            decompose-load-elements
             $p "${@:2}"
             exit 0
           fi
