@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# This file is both used to generate a list of core commands and processes
+# as well as generate bash completion
+
+# main
+_decompose_complete() {
+  local cur
+
+  COMPREPLY=()
+  cur=${COMP_WORDS[COMP_CWORD]}
+
+  case "$cur" in
+    -*)
+    COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
+      -- $cur ) );;
+  esac
+
+  return 0
+}

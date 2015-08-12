@@ -13,6 +13,7 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 # Source decompose functions
 source "$DIR/decompose-functions"
+source "$DIR/completion/decompose-bash-completion-functions"
 
 decompose-bootstrap
 decompose-parse-parameters "$@"

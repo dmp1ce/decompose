@@ -1,18 +1,15 @@
 #!/bin/bash
 # decompose bash completion
-_decompose_complete() {
-  local cur
 
-  COMPREPLY=()
-  cur=${COMP_WORDS[COMP_CWORD]}
+# Get the location of the script. Not the symlink.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
-  case "$cur" in
-    -*)
-    COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
-      -- $cur ) );;
-  esac
-
-  return 0
-}
+source "$DIR/decompose-bash-completion-functions"
 
 complete -F _decompose_complete decompose
