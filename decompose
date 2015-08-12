@@ -82,11 +82,10 @@ HELP_EOF
 #   $2: hash value returned
 decompose-md5-hash() {
   local string_value=$1
-  local hash_value=$2
+  local __hash_value=$2
 
-  #echo "$environment_url whatever"
   local _hash=$(echo "$string_value" | md5sum)
-  eval "$hash_value=${_hash% -*}"
+  eval "$__hash_value=${_hash% -*}"
 }
 
 # Initialize the environment (.decompose directory)
@@ -102,18 +101,8 @@ decompose-init-environment() {
     return 1
   fi
 
-  # Clone (or update) the environment
-  local decompose_data_dir=$(realpath ~/.local/share/decompose)
-  local environment_hash
-  decompose-md5-hash $environment_url environment_hash
-
-  # If the directory exists then try to update the repository or else clone
-  if [ -d "$decompose_data_dir/ecosphere/$environment_hash" ]; then
-    git -C $decompose_data_dir/ecosphere/$environment_hash pull
-  else
-    git clone $environment_url \
-      $decompose_data_dir/ecosphere/$environment_hash
-  fi
+  # Update git repository
+  decompose-update-git-repository $environment_url
 
   # Copy files from clone to .decompose
   # Is environment created already?
@@ -126,16 +115,27 @@ decompose-init-environment() {
   fi
 
   echo "Initializing environment"
-  mkdir ".decompose"
 
-  # Save decompose environment
-  cat <<ENV_FILE > .decompose-init
-$environment_url
-ENV_FILE
+  # If .decompose-init exists then put .decompose in the right place
+  local project_root
+  decompose-project-root project_root
+  if [ "$?" -gt "0" ]; then
+    mkdir ".decompose"
+    # Save .decompose-init
+    echo "$environment_url" > .decompose-init
+  else
+    mkdir "$project_root/.decompose"
+  fi
+
+  # Project root will definetly exist now.
+  decompose-project-root project_root
 
   # Copy environment files
-  mkdir ".decompose/environment"
-  cp -r $decompose_data_dir/ecosphere/$environment_hash/* .decompose/environment
+  mkdir "$project_root/.decompose/environment"
+  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local environment_hash
+  decompose-md5-hash $environment_url environment_hash
+  cp -r "$decompose_data_dir/ecosphere/$environment_hash/"* "$project_root/.decompose/environment"
 }
 
 # Initialize environment command
@@ -173,7 +173,6 @@ decompose-directory-exists() {
   if [ "$?" -gt "0"  ]; then
     return 1
   fi
-
   return 0
 }
 
@@ -189,6 +188,25 @@ decompose-load-elements() {
   fi
 }
 
+# Updates a git repository
+#
+# Parameters
+#   $1: git repository URL
+decompose-update-git-repository() {
+  local git_repo_url=$1
+
+  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+
+  local git_repo_hash
+  decompose-md5-hash $git_repo_url git_repo_hash
+  if [ -d "$decompose_data_dir/ecosphere/$git_repo_hash" ]; then
+    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" pull
+  else
+    git clone $git_repo_url \
+      "$decompose_data_dir/ecosphere/$git_repo_hash"
+  fi
+}
+
 # Updates decompose environment
 decompose-update-environment() {
   # If .decompose-init doesn't exist then there is nothing we can do
@@ -201,34 +219,32 @@ decompose-update-environment() {
     exit 1
   fi
 
-  # If decompose directory doesn't exist initialize .decompose directory
+  local environment_url=$(cat "$project_root/.decompose-init")
+
+  # If .decompose directory doesn't exist initialize .decompose directory
   decompose-directory-exists
   if [ "$?" -gt "0" ]; then
-    local environment_url=$(cat "$project_root/.decompose-init")
-
     # Initialize .decompose
     decompose-init-environment $environment_url
 
     return "$?"
   fi
 
+  # Update git repository
+  decompose-update-git-repository $environment_url
+
+  # Update environment
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
   local decompose_directory
   decompose-find-decompose-directory decompose_directory
-
-  # Update git repository
-  local environment_url=$(cat "$project_root/.decompose-init")
   local environment_hash
   decompose-md5-hash $environment_url environment_hash
-  git -C "$decompose_data_dir/ecosphere/$environment_hash" pull
-
-  # Update environment
-  if [ -n $decompose_directory ]; then
+  if [ -n "$decompose_directory" ]; then
     rm -r $decompose_directory/environment
     mkdir -p $decompose_directory/environment
+    cp -r $decompose_data_dir/ecosphere/$environment_hash/* \
+      $decompose_directory/environment
   fi
-  cp -r $decompose_data_dir/ecosphere/$environment_hash/* \
-    $decompose_directory/environment
 }
 
 # Build project files from templates
@@ -251,24 +267,19 @@ decompose-build() {
     echo "$t -> ${t%.*}"
   done
 }
-
 # Finds the decompose directory in parents
 #
 # Parameters:
 #   $1: return value (decompose directory location)
 decompose-find-decompose-directory() {
-  local current_dir=$(realpath .)
-  while [[ ! -d "$current_dir/.decompose" && "$current_dir" != "/" ]]; do
-    current_dir=$(realpath $current_dir/../)
-  done
+  local __decompose_directory=$1
+  local decompose_root
+  decompose-project-root decompose_root
 
-  # We hit the end. See if we found .decompose
-  if [ -d "$current_dir/.decompose" ]; then
-    eval "$1=$current_dir/.decompose"
+  if [ -d "$decompose_root/.decompose" ]; then
+    eval "$__decompose_directory=$decompose_root/.decompose"
     return 0
   fi
-
-  # I guess we didn't find .decompose
   return 1
 }
 
@@ -277,10 +288,20 @@ decompose-find-decompose-directory() {
 # Parameters:
 #   $1: return value (project root location)
 decompose-project-root() {
-  local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  local __return_val=$1
+  local current_dir=$(realpath .)
+  while [[ ! -d "$current_dir/.decompose" && \
+    ! -e "$current_dir/.decompose-init" &&  \
+    "$current_dir" != "/" ]]; do
+    current_dir=$(realpath $current_dir/../)
+  done
 
-  eval "$1=$(realpath $decompose_directory/../)"
+  # We hit the end. See if we found .decompose or .decompose-init
+  if [[ -d "$current_dir/.decompose" || -e "$current_dir/.decompose-init" ]]; then
+    eval "$__return_val=$current_dir"
+    return 0
+  fi
+  return 1
 }
 
 # Create/collect configuration where necessary
