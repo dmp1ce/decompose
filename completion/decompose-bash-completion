@@ -1,0 +1,18 @@
+#!/bin/bash
+# decompose bash completion
+_decompose_complete() {
+  local cur
+
+  COMPREPLY=()
+  cur=${COMP_WORDS[COMP_CWORD]}
+
+  case "$cur" in
+    -*)
+    COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
+      -- $cur ) );;
+  esac
+
+  return 0
+}
+
+complete -F _decompose_complete decompose
