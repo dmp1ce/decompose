@@ -9,7 +9,7 @@
 decompose-parse-parameters() {
   case $1 in
     "--init")
-      decompose-init-command $2 $3;;
+      decompose-init-command $2;;
     "--update")
       decompose-update-environment;;
     "--build")
@@ -47,7 +47,7 @@ decompose - Development Environment Compose
 
 Core commands:
 
---init <git_url> <environment_name>
+--init <git_url>
   Initialize an environment from a git URL and name
 --update
   Update the current environment
@@ -74,14 +74,26 @@ HELP_EOF
   fi
 }
 
+# Return md5 hash of parameter $1
+#
+# Parameters:
+#   $1: string to hash
+#   $2: hash value returned
+decompose-md5-hash() {
+  local string_value=$1
+  local hash_value=$2
+
+  #echo "$environment_url whatever"
+  local _hash=$(echo "$string_value" | md5sum)
+  eval "$hash_value=${_hash% -*}"
+}
+
 # Initialize the environment (.decompose directory)
 #
 # Paramaters:
 #   $1: environment url
-#   $2: environment name
 decompose-init-environment() {
   local environment_url=$1
-  local environment_name=$2
 
   # Is environment parameter valid?
   if [ -z "$environment_url" ]; then
@@ -89,14 +101,18 @@ decompose-init-environment() {
     return 1
   fi
 
-  if [ -z "$environment_name" ]; then
-    echo "Please supply an environment name to initialize"
-    return 1
-  fi
-
-  # Clone the environment
+  # Clone (or update) the environment
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
-  git clone $environment_url $decompose_data_dir/ecosphere/$environment_name
+  local environment_hash
+  decompose-md5-hash $environment_url environment_hash
+
+  # If the directory exists then try to update the repository or else clone
+  if [ -d "$decompose_data_dir/ecosphere/$environment_hash" ]; then
+    git -C $decompose_data_dir/ecosphere/$environment_hash pull
+  else
+    git clone $environment_url \
+      $decompose_data_dir/ecosphere/$environment_hash
+  fi
 
   # Copy files from clone to .decompose
   # Is environment created already?
@@ -112,24 +128,21 @@ decompose-init-environment() {
   mkdir ".decompose"
 
   # Save decompose environment
-  cat <<ENV_FILE > ".decompose/environment_settings"
-DECOMPOSE_ENVIRONMENT_URL=$environment_url
-DECOMPOSE_ENVIRONMENT_NAME=$environment_name
+  cat <<ENV_FILE > .decompose-init
+$environment_url
 ENV_FILE
 
   # Copy environment files
   mkdir ".decompose/environment"
-  cp -r $decompose_data_dir/ecosphere/$environment_name/* .decompose/environment
+  cp -r $decompose_data_dir/ecosphere/$environment_hash/* .decompose/environment
 }
 
 # Initialize environment command
 #
 # Paramaters:
 #   $1: environment url
-#   $2: environment name
 decompose-init-command() {
   local environment_url=$1
-  local environment_name=$2
 
   # Is environment parameter valid?
   if [ -z "$environment_url" ]; then
@@ -137,13 +150,8 @@ decompose-init-command() {
     exit 1
   fi
 
-  if [ -z "$environment_name" ]; then
-    echo "Please supply an environment name to initialize"
-    exit 1
-  fi
-
   # Create environment
-  decompose-init-environment $environment_url $environment_name
+  decompose-init-environment $environment_url
 
   # If error occured then quit
   if [ "$?" -gt "0" ]; then
@@ -155,8 +163,8 @@ decompose-init-command() {
   cp -r .decompose/environment/skel/. ./
 }
 
-# Load environment settings
-decompose-load-environment-settings() {
+# Return 0 if .decompose exists, else return 1
+decompose-directory-exists() {
   local decompose_directory
   decompose-find-decompose-directory decompose_directory
 
@@ -165,7 +173,7 @@ decompose-load-environment-settings() {
     return 1
   fi
 
-  . $decompose_directory/environment_settings
+  return 0
 }
 
 # Load elements
@@ -182,39 +190,44 @@ decompose-load-elements() {
 
 # Updates decompose environment
 decompose-update-environment() {
-  decompose-load-environment-settings
+  # If .decompose-init doesn't exist then there is nothing we can do
+  local project_root
+  decompose-project-root project_root
+  if [ ! -e "$project_root/.decompose-init" ]; then
+    echo "Cannot update '.decompose' because '.decompose-init' is missing"
+    echo "Create a '.decompose-init' file with the URL to the environment URL"
+    echo "Or delete the '.decompose' directory and run 'decompose --init' again"
+    exit 1
+  fi
 
-  # If settings failed to load then look for .decompose-init
+  # If decompose directory doesn't exist initialize .decompose directory
+  decompose-directory-exists
   if [ "$?" -gt "0" ]; then
-    if [ -e ".decompose-init" ]; then
-      local environment_url=$(cat ".decompose-init")
+    local environment_url=$(cat "$project_root/.decompose-init")
 
-      local environment_url_tmp=${environment_url%.*}
-      local environment_name=${environment_url_tmp##*/}
+    # Initialize .decompose
+    decompose-init-environment $environment_url
 
-      # Initialize .decompose
-      decompose-init-environment $environment_url $environment_name
-
-      return "$?"
-    fi
-
-    echo -n "Missing '.decompose/environment_settings' directory or "
-    echo "'.decompose-init' file"
-    return 1;
+    return "$?"
   fi
 
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
   local decompose_directory
   decompose-find-decompose-directory decompose_directory
+
   # Update git repository
-  git -C "$decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME" pull
+  local environment_url=$(cat "$project_root/.decompose-init")
+  local environment_hash
+  decompose-md5-hash $environment_url environment_hash
+  git -C "$decompose_data_dir/ecosphere/$environment_hash" pull
 
   # Update environment
   if [ -n $decompose_directory ]; then
-    rm -r $decompose_directory/environment/*
+    rm -r $decompose_directory/environment
+    mkdir -p $decompose_directory/environment
   fi
-  cp -r $decompose_data_dir/ecosphere/$DECOMPOSE_ENVIRONMENT_NAME/* \
-$decompose_directory/environment
+  cp -r $decompose_data_dir/ecosphere/$environment_hash/* \
+    $decompose_directory/environment
 }
 
 # Build project files from templates
@@ -289,7 +302,7 @@ decompose-bootstrap() {
 decompose-verify-dependencies() {
   local return_code
   local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
-    'chmod')
+    'chmod' 'md5sum')
 
   for check in ${checks[@]}; do
     which $check >/dev/null 2>&1
