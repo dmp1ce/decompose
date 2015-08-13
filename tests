@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Decompose tests, for my sanity
+
+_decompose-test-no-errors() {
+  output=$(./decompose)
+  return "$?"
+}
+
+_decompose-test-run-tests() {
+  local _decompose_tests_to_run=( 'no-errors' )
+  
+  for test in $_decompose_tests_to_run; do
+    _decompose-test-$test
+    
+    echo -n "Test '$test': "
+    if [ "$?" -gt "0" ]; then
+      echo "FAIL with return code '$?'"
+    else
+      echo "PASS" 
+    fi
+  done
+}
+
+_decompose-test-run-tests
