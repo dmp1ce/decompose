@@ -1,3 +1,4 @@
+#!/bin/bash
 # decompose functions
 #
 # Assume $DIR is defined as the root directory of the calling script.
@@ -343,6 +344,6 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.6"
+  local version="0.7"
   echo "decompose v$version"
 }
