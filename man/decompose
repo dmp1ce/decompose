@@ -1,0 +1,50 @@
+NAME
+  decompose - templating framework to help developers easily create and switch
+  environments
+SYNOPSIS
+  decompose [--init <git_url>|--update|--build|--version|--help]
+  decompose process [args..]
+DESCRIPTION
+  decompose is a templating framework to help developers easily create and
+  switch environments. decompose provides development environment templates,
+  custom variables and commands.
+
+  How to use decompose: 
+  Initialize  Normal usage of decompose is to first either initialize the
+    development environment with the [--init] command or if the .decompose-init
+    file exists in the project run the update command [--update].
+  Commands and templates  After the decompose environment is initalized,
+    elements and processes will be available. This means that the build command
+    [--build] will work to convert .mo template files into a file without a .mo
+    extension and placeholder variables completed. Also, processes can be viewed
+    from the help command [--help] as well as run using 'decompose process'
+    syntax.
+  Building environments   decompose enviornments are consist of a skeleton of
+    the project, located in the 'skel' directory, elements located in the
+    'elements' file, and processes defined in the 'processes' file.
+OPTIONS
+  There are no options. Only commands starting with '--' or processes from the
+  environment. Processes can have their own arguments and options as defined in
+  the 'processes' file.
+EXAMPLE
+  Initialize the an example repository
+
+      $ decompose --init https://github.com/dmp1ce/decompose-hello-world.git
+
+  Update environment after it has changed
+
+      $ decompose --update
+
+  Update build all templates
+
+      $ decompose --build
+
+  Run 'hello_world' process defined in the 'processes' file in the
+  'decompose-hello-world' example environment.
+
+      $ decompose hello_world
+
+  See any public decompose environment for an example of how to create
+  environments such as https://github.com/dmp1ce/decompose-hello-world.git
+AUTHOR
+  David Parrish <daveparrish@tutanota.com>

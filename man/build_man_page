@@ -1,0 +1,5 @@
+#!/bin/bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+txt2man -t 'decompose' -s 1 $DIR/decompose | gzip > decompose.1.gz
