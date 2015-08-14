@@ -327,7 +327,7 @@ decompose-bootstrap() {
 # Print dependencies that are missing
 decompose-verify-dependencies() {
   local return_code
-  local checks=('which' 'mo' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
+  local checks=('which' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
     'chmod' 'md5sum')
 
   for check in ${checks[@]}; do
@@ -338,6 +338,12 @@ decompose-verify-dependencies() {
       if [ "$check" == "which" ]; then break; fi
     fi
   done
+
+  # Check that mo exists.
+  if [ ! -e "$DIR/mo/mo" ]; then
+    echo "'mo' is missing"
+    return_code=1
+  fi
 
   return $return_code
 }
