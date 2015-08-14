@@ -291,7 +291,7 @@ decompose-bootstrap() {
 # Print dependencies that are missing
 decompose-verify-dependencies() {
   local return_code
-  local checks=('which' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
+  local checks=('bash' 'which' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
     'chmod' 'md5sum')
 
   for check in ${checks[@]}; do
