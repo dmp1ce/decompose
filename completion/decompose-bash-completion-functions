@@ -5,15 +5,29 @@
 
 # main
 _decompose_complete() {
-  local cur
+  local cur prev words cword
+  _init_completion || return
 
-  COMPREPLY=()
-  cur=${COMP_WORDS[COMP_CWORD]}
+  local processes=( 'hello_world' 'gogo' 'test' )
+
+  # Do if 2 words already exist
+  if [ "$cword" -gt "1" ]; then
+    return 0
+  fi
 
   case "$cur" in
     -*)
-    COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
-      -- $cur ) );;
+      COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
+        -- $cur ) );;
+    *)
+      # Not a command, so check to see if it is a process
+      local matches
+      for process in ${processes[@]}; do
+        if [[ $process =~ ^"$cur" ]]; then
+          matches="$matches $process"
+        fi
+      done
+      COMPREPLY=( $( compgen -W '$matches' -- $cur ) );;
   esac
 
   return 0
