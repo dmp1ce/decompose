@@ -2,20 +2,48 @@
 
 # Decompose tests, for my sanity
 
+# Get the location of the script. Not the symlink.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -h "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE" # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+# Source decompose functions
+source "$DIR/decompose-functions"
+source "$DIR/completion/decompose-bash-completion-functions"
+
+# Make sure nothing is printed on stderr
 _decompose-test-no-errors() {
-  output=$(./decompose)
-  return "$?"
+  output=$(./decompose 2>&1 1>/dev/null)
+  if [ -n "$output" ]; then
+    echo $output
+    return 1
+  fi
+  return 0
+}
+
+# Just check that help prints something
+_decompose-test-help-test() {
+  output=$(decompose-print-help)
+  if [ -z "$ouput" ]; then
+    return 0
+  fi
+  return 1
 }
 
 _decompose-test-run-tests() {
-  local _decompose_tests_to_run=( 'no-errors' )
+  local _decompose_tests_to_run=( 'no-errors' 'help-test' )
   
-  for test in $_decompose_tests_to_run; do
+  for test in ${_decompose_tests_to_run[@]}; do
     _decompose-test-$test
+    error_code="$?"
     
     echo -n "Test '$test': "
-    if [ "$?" -gt "0" ]; then
-      echo "FAIL with return code '$?'"
+    if [ "$error_code" -gt "0" ]; then
+      echo "FAIL with return code '$error_code'"
     else
       echo "PASS" 
     fi
