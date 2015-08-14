@@ -16,7 +16,7 @@ source "$DIR/decompose-functions"
 source "$DIR/completion/decompose-bash-completion-functions"
 
 # Make sure nothing is printed on stderr
-_decompose-test-no-errors() {
+_decompose-test-no-stderr() {
   output=$(./decompose 2>&1 1>/dev/null)
   if [ -n "$output" ]; then
     echo $output
@@ -35,7 +35,7 @@ _decompose-test-help-test() {
 }
 
 _decompose-test-run-tests() {
-  local _decompose_tests_to_run=( 'no-errors' 'help-test' )
+  local _decompose_tests_to_run=( 'no-stderr' 'help-test' )
   
   for test in ${_decompose_tests_to_run[@]}; do
     _decompose-test-$test
