@@ -1,26 +1,19 @@
-# Development Environment Compose (decompose)
+# Development Environment Compose (**decompose**)
 
-Decompose is a templating framework to help developers easily create and switch environments. Decompose provides development environment templates, custom variables and commands.
+**decompose** is a templating framework to help developers easily create and switch environments. **decompose** provides development environment templates, custom variables and commands.
 
 "Don't decompose trying to manage various environments!"
 
 ## Requirements
 
-Decompose is implemented in bash to avoid complex dependencies. However, Decompose does depend on a few tools.
+**decompose** is implemented in bash to avoid complex dependencies. However, **decompose** does depend on a few tools.
 
 The following is required:
 - [bash](https://en.wikipedia.org/wiki/Bash_%28Unix_shell%29)
 - [git](www.git-scm.com)
-- [mo](https://github.com/tests-always-included/mo)
-- common linux commands (which, echo, cat, mkdir, realpath, cp, find)
+- common linux commands (bash, which, echo, cat, mkdir, realpath, cp, find, chmod, md5sum)
 
-Decompose will try to detect missing dependencies when it is run.
-
-### Installing Mo
-
-Probably dependency which no one will have is 'mo'. Fortuately, 'mo' is easy to install. For most linux users, simply copy the 'mo' script into a `bin` directory and make it available in your $PATH variable.
-
-Arch Linux users can [install 'mo' from the AUR](https://aur.archlinux.org/packages/mo-git/).
+**decompose** will try to detect missing dependencies when it is run.
 
 ## Usage
 
@@ -112,7 +105,7 @@ HELP_EOF
 
 Tempalates are located in the `skel` directory and copied to the projects root on `--init`. Templates follow a basic [mustache](https://mustache.github.io/) specification. Specifically, the templates are processed using [mo](https://github.com/tests-always-included/mo), a bash implementation of mustache.
 
-Decompose will use `elements` to complete the template file variables.
+**decompose** will use `elements` to complete the template file variables.
 
 Example:
 ```
@@ -133,15 +126,19 @@ Actual value '{{PROJECT_CONDITION}}'
 Default setting {{PROJECT_RANDOM_SETTING}}
 ```
 
+## Mo
+
+**decompose** uses [mo](https://github.com/tests-always-included/mo) to do mustache templates. *Mo* is a mustache templating system written in pure bash.
+
 ## Vocabulary
 
 To keep things fun, lets try to stick with a theme of natural decomposition
 
 - Ecosphere is an index of environments
-- Environments contain skeleton, processes, elements and templates
-- Skeleton is the environment framework files
+- Environments contain a skeleton, processes, elements and templates
+- A skeleton is the environment framework files
 - .mo files are the template file or organism undergoing rigor (mo)rtis (the extension (.mo) is also the bash mustache extenstion)
-- elements are the variables used by the .mo templates
-- processes are the commands
+- Elements are the variables used by the .mo templates
+- Processes are the custom environment commands
 
 Hence, organisms *decompose* in *environments* by *elements* and *processes* after rigor *mo*rtis until only the *skeleton* remains.
