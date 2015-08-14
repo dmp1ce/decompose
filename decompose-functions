@@ -25,7 +25,7 @@ decompose-parse-parameters() {
     *)
       # Go through all environment commands
       local decompose_directory
-      decompose-find-decompose-directory decompose_directory
+      _decompose-find-decompose-directory decompose_directory
 
       if [ -f $decompose_directory/environment/processes ]; then
         . $decompose_directory/environment/processes
@@ -66,7 +66,7 @@ HELP_EOF
 
   # Go through all environment commands
   local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  _decompose-find-decompose-directory decompose_directory
 
   if [ -f $decompose_directory/environment/processes ]; then
     echo -e "\nEnvironment processes:\n"
@@ -111,7 +111,7 @@ decompose-init-environment() {
   # Copy files from clone to .decompose
   # Is environment created already?
   local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  _decompose-find-decompose-directory decompose_directory
   if [ -d "$decompose_directory" ]; then
     echo ".decompose directory already exists here:"
     echo "$decompose_directory"
@@ -122,7 +122,7 @@ decompose-init-environment() {
 
   # If .decompose-init exists then put .decompose in the right place
   local project_root
-  decompose-project-root project_root
+  _decompose-project-root project_root
   if [ "$?" -gt "0" ]; then
     mkdir ".decompose"
     # Save .decompose-init
@@ -132,7 +132,7 @@ decompose-init-environment() {
   fi
 
   # Project root will definetly exist now.
-  decompose-project-root project_root
+  _decompose-project-root project_root
 
   # Copy environment files
   mkdir "$project_root/.decompose/environment"
@@ -171,7 +171,7 @@ decompose-init-command() {
 # Return 0 if .decompose exists, else return 1
 decompose-directory-exists() {
   local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  _decompose-find-decompose-directory decompose_directory
 
   # If .decompose is missing then return error code.
   if [ "$?" -gt "0"  ]; then
@@ -183,7 +183,7 @@ decompose-directory-exists() {
 # Load elements
 decompose-load-elements() {
   local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  _decompose-find-decompose-directory decompose_directory
 
   # Load default settings and then overrides
   . $decompose_directory/environment/elements
@@ -215,7 +215,7 @@ decompose-update-git-repository() {
 decompose-update-environment() {
   # If .decompose-init doesn't exist then there is nothing we can do
   local project_root
-  decompose-project-root project_root
+  _decompose-project-root project_root
   if [ ! -e "$project_root/.decompose-init" ]; then
     echo "Cannot update '.decompose' because '.decompose-init' is missing"
     echo "Create a '.decompose-init' file with the URL to the environment URL"
@@ -240,7 +240,7 @@ decompose-update-environment() {
   # Update environment
   local decompose_data_dir=$(realpath ~/.local/share/decompose)
   local decompose_directory
-  decompose-find-decompose-directory decompose_directory
+  _decompose-find-decompose-directory decompose_directory
   local environment_hash
   decompose-md5-hash $environment_url environment_hash
   if [ -n "$decompose_directory" ]; then
@@ -256,7 +256,7 @@ decompose-build() {
   echo "Building project files from templates"
   # Find all .mo files
   local project_root
-  decompose-project-root project_root
+  _decompose-project-root project_root
   local templates=(
     $(find $project_root -path "$project_root/.decompose" -prune -o -name "*.mo" -print)
   )
@@ -270,42 +270,6 @@ decompose-build() {
     chmod --reference $t ${t%.*}
     echo "$t -> ${t%.*}"
   done
-}
-# Finds the decompose directory in parents
-#
-# Parameters:
-#   $1: return value (decompose directory location)
-decompose-find-decompose-directory() {
-  local __decompose_directory=$1
-  local decompose_root
-  decompose-project-root decompose_root
-
-  if [ -d "$decompose_root/.decompose" ]; then
-    eval "$__decompose_directory=$decompose_root/.decompose"
-    return 0
-  fi
-  return 1
-}
-
-# Returns the project root directory
-#
-# Parameters:
-#   $1: return value (project root location)
-decompose-project-root() {
-  local __return_val=$1
-  local current_dir=$(realpath .)
-  while [[ ! -d "$current_dir/.decompose" && \
-    ! -e "$current_dir/.decompose-init" &&  \
-    "$current_dir" != "/" ]]; do
-    current_dir=$(realpath $current_dir/../)
-  done
-
-  # We hit the end. See if we found .decompose or .decompose-init
-  if [[ -d "$current_dir/.decompose" || -e "$current_dir/.decompose-init" ]]; then
-    eval "$__return_val=$current_dir"
-    return 0
-  fi
-  return 1
 }
 
 # Create/collect configuration where necessary

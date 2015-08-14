@@ -3,32 +3,71 @@
 # This file is both used to generate a list of core commands and processes
 # as well as generate bash completion
 
+# Finds the decompose directory in parents
+#
+# Parameters:
+#   $1: return value (decompose directory location)
+_decompose-find-decompose-directory() {
+  local __decompose_directory=$1
+  local decompose_root
+  _decompose-project-root decompose_root
+
+  if [ -d "$decompose_root/.decompose" ]; then
+    eval "$__decompose_directory=$decompose_root/.decompose"
+    return 0
+  fi
+  return 1
+}
+
+# Returns the project root directory
+#
+# Parameters:
+#   $1: return value (project root location)
+_decompose-project-root() {
+  local __return_val=$1
+  local current_dir=$(realpath .)
+  while [[ ! -d "$current_dir/.decompose" && \
+    ! -e "$current_dir/.decompose-init" &&  \
+    "$current_dir" != "/" ]]; do
+    current_dir=$(realpath $current_dir/../)
+  done
+
+  # We hit the end. See if we found .decompose or .decompose-init
+  if [[ -d "$current_dir/.decompose" || -e "$current_dir/.decompose-init" ]]; then
+    eval "$__return_val=$current_dir"
+    return 0
+  fi
+  return 1
+}
+
+# Return all process names as output
+_decompose-process-names() {
+  # Go through all environment commands
+  local decompose_directory
+  _decompose-find-decompose-directory decompose_directory
+
+  if [ -f $decompose_directory/environment/processes ]; then
+    . $decompose_directory/environment/processes
+    for p in "${DECOMPOSE_PROCESSES[@]}"; do
+      echo -n "$p "
+    done
+  fi
+}
+
 # main
 _decompose_complete() {
   local cur prev words cword
   _init_completion || return
 
-  local processes=( 'hello_world' 'gogo' 'test' )
+  local processes=$(_decompose-process-names)
+  local commands="--init --update --build --version --help"
 
   # Do if 2 words already exist
   if [ "$cword" -gt "1" ]; then
     return 0
   fi
 
-  case "$cur" in
-    -*)
-      COMPREPLY=( $( compgen -W '--init --update --build --version --help' \
-        -- $cur ) );;
-    *)
-      # Not a command, so check to see if it is a process
-      local matches
-      for process in ${processes[@]}; do
-        if [[ $process =~ ^"$cur" ]]; then
-          matches="$matches $process"
-        fi
-      done
-      COMPREPLY=( $( compgen -W '$matches' -- $cur ) );;
-  esac
-
+  # Only match one level deep. Simple to do that!
+  COMPREPLY=( $( compgen -W '$commands $processes' -- $cur ) )
   return 0
 }
