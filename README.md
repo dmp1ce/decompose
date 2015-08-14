@@ -15,6 +15,23 @@ The following is required:
 
 **decompose** will try to detect missing dependencies when it is run.
 
+## Installation
+
+**decompose** includes the **decompose** bash script and a few bash script dependencies. Tab completion and a man page is also available to install.
+
+### Manual install
+
+1. Clone this repository. (`$ git clone https://github.com/dmp1ce/decompose.git`)
+2. Symlink the `decompose` script to somewhere your `$PATH` can see it. For example: (`$ ln -s ~/decompose/decompose /usr/local/bin`)
+3. (Optional for tab completion) Symlink the `completion/decompose-bash-completion` to your bash completion directory. For example: (`$ ln -s ~/decompose/completion/decompose-bash-completion /usr/share/bash-completion/completions/decompose`)
+4. (Optional for man page) Install `txt2man` to build the man page.
+5. (Optional for man page) Build the manpage with the script `man/build_man_page`. (`$ ./build_man_page`)
+6. (Optional for man page) Symlink the manpage to you man page directory. For example (`$ ln -s ~/decompose/man/decompose.1.gz /usr/share/man/man1`)
+
+### Arch Linux
+
+Install using the [AUR package here](https://aur.archlinux.org/packages/decompose-git/).
+
 ## Usage
 
 ```
