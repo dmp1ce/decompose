@@ -314,6 +314,6 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.7"
+  local version="0.8"
   echo "decompose v$version"
 }
