@@ -23,21 +23,14 @@ decompose-parse-parameters() {
     "--completion")
       decompose-completion;;
     *)
-      # Go through all environment commands
-      local decompose_directory
-      _decompose-find-decompose-directory decompose_directory
-
-      if [ -f $decompose_directory/environment/processes ]; then
-        . $decompose_directory/environment/processes
-        for p in "${DECOMPOSE_PROCESSES[@]}"
-        do
-          if [ "$1" == "$p" ]; then
-            decompose-load-elements
-            $p "${@:2}"
-            exit 0
-          fi
-        done
-      fi
+      _decompose-load-processes
+      local p; for p in "${DECOMPOSE_PROCESSES[@]}"; do
+        if [ "$1" == "$p" ]; then
+          decompose-load-elements
+          $p "${@:2}"
+          exit 0
+        fi
+      done
 
       echo "Unknown parameter '$1'"
       decompose-print-help
@@ -64,15 +57,11 @@ Core commands:
   This message
 HELP_EOF
 
-  # Go through all environment commands
-  local decompose_directory
-  _decompose-find-decompose-directory decompose_directory
-
-  if [ -f $decompose_directory/environment/processes ]; then
+  _decompose-load-processes
+  if [ "${#DECOMPOSE_PROCESSES[@]}" -gt "0" ]; then
     echo -e "\nEnvironment processes:\n"
 
-    . $decompose_directory/environment/processes
-    for p in "${DECOMPOSE_PROCESSES[@]}"; do
+    local p; for p in "${DECOMPOSE_PROCESSES[@]}"; do
       echo "$p"
       "$p"_help
     done
@@ -192,7 +181,7 @@ decompose-load-elements() {
   fi
 
   # Post process elements
-  for p in ${ELEMENTS_POST_PROCESS[@]}; do
+  local p; for p in ${ELEMENTS_POST_PROCESS[@]}; do
     _decompose-elements-$p
   done
 }
@@ -270,7 +259,7 @@ decompose-build() {
   decompose-load-elements
 
   # Process .mo files
-  for t in ${templates[@]}; do
+  local t; for t in ${templates[@]}; do
     cat $t | . "$DIR/mo/mo" > ${t%.*}
     chmod --reference $t ${t%.*}
     echo "$t -> ${t%.*}"
@@ -299,7 +288,7 @@ decompose-verify-dependencies() {
   local checks=('bash' 'which' 'echo' 'cat' 'mkdir' 'git' 'realpath' 'cp' 'find'
     'chmod' 'md5sum')
 
-  for check in ${checks[@]}; do
+  local check; for check in ${checks[@]}; do
     which $check >/dev/null 2>&1
     if [ "$?" -ne "0" ]; then
       echo "'$check' command is missing"

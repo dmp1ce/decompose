@@ -40,18 +40,28 @@ _decompose-project-root() {
   return 1
 }
 
-# Return all process names as output
-_decompose-process-names() {
+# Bring in all the processes code
+_decompose-load-processes() {
   # Go through all environment commands
   local decompose_directory
   _decompose-find-decompose-directory decompose_directory
 
+  # Main processes code
   if [ -f $decompose_directory/environment/processes ]; then
     . $decompose_directory/environment/processes
-    for p in "${DECOMPOSE_PROCESSES[@]}"; do
-      echo -n "$p "
-    done
   fi
+  # Also load custom processes
+  if [ -f $decompose_directory/processes ]; then
+    . $decompose_directory/processes
+  fi
+}
+
+# Return all process names as output
+_decompose-process-names() {
+  _decompose-load-processes
+  local p; for p in "${DECOMPOSE_PROCESSES[@]}"; do
+    echo -n "$p "
+  done
 }
 
 # main
