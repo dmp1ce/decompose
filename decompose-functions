@@ -190,6 +190,11 @@ decompose-load-elements() {
   if [ -e $decompose_directory/elements ]; then
     . $decompose_directory/elements
   fi
+
+  # Post process elements
+  for p in ${ELEMENTS_POST_PROCESS[@]}; do
+    _decompose-elements-$p
+  done
 }
 
 # Updates a git repository
@@ -314,6 +319,6 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.8"
+  local version="0.9"
   echo "decompose v$version"
 }
