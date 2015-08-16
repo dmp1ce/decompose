@@ -181,6 +181,11 @@ decompose-load-elements() {
   fi
 
   # Post process elements
+  decompose-post-process-elements
+}
+
+# Post process elements
+decompose-post-process-elements() {
   local p; for p in ${ELEMENTS_POST_PROCESS[@]}; do
     _decompose-elements-$p
   done
@@ -248,15 +253,22 @@ decompose-update-environment() {
 # Build project files from templates
 decompose-build() {
   echo "Building project files from templates"
+
+  # Get elements
+  decompose-load-elements
+
+  # Process templates
+  decompose-process-templates
+}
+
+# Process .mo files
+decompose-process-templates() {
   # Find all .mo files
   local project_root
   _decompose-project-root project_root
   local templates=(
     $(find $project_root -path "$project_root/.decompose" -prune -o -name "*.mo" -print)
   )
-
-  # Get elements
-  decompose-load-elements
 
   # Process .mo files
   local t; for t in ${templates[@]}; do
@@ -308,6 +320,6 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.10"
+  local version="0.11"
   echo "decompose v$version"
 }
