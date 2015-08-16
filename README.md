@@ -66,7 +66,7 @@ root_directory
 Init will download and prepare an environment from and environment template. Environment templates are stored in git.
 
 Example:
-`decompose --init https://github.com/dmp1ce/decompose-hello-world.git hello_world`
+`decompose --init https://github.com/dmp1ce/decompose-hello-world.git`
 
 ### Update
 
@@ -105,11 +105,11 @@ Example:
 #!/bin/bash
 DECOMPOSE_PROCESSES=('hello_world')
 
-hello_world() {
+_decompose-process-hello_world() {
   echo "Hello World!"
 }
 
-hello_world_help() {
+_decompose-process-hello_world_help() {
   cat <<HELP_EOF
   Hello World Help
   This is an example help file
