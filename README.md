@@ -66,21 +66,21 @@ root_directory
 Init will download and prepare an environment from and environment template. Environment templates are stored in git.
 
 Example:
-`decompose --init https://github.com/dmp1ce/decompose-hello-world.git`
+`$ decompose --init https://github.com/dmp1ce/decompose-hello-world.git`
 
 ### Update
 
 Update will update the environment template default elements and processes. Update will not automatically update template files as they are intended to be changed during development.
 
 Example:
-`decompose --update`
+`$ decompose --update`
 
 ### Build
 
 Build will apply elements to the .mo template files. Custom elements can be created in the `.decompose/elements` file manually.
 
 Example:
-`decompose --build`
+`$ decompose --build`
 
 ### Environment commands
 
