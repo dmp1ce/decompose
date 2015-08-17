@@ -1,4 +1,3 @@
-#!/bin/bash
 # decompose functions
 #
 # Assume $DIR is defined as the root directory of the calling script.
@@ -40,6 +39,7 @@ decompose-parse-parameters() {
 
 # Print help
 decompose-print-help() {
+  decompose-load-elements
   cat <<HELP_EOF
 decompose - Development Environment Compose
 
@@ -323,3 +323,4 @@ decompose-version() {
   local version="0.11"
   echo "decompose v$version"
 }
+# vim:syntax=sh
