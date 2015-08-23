@@ -175,7 +175,9 @@ decompose-load-elements() {
   _decompose-find-decompose-directory decompose_directory
 
   # Load default settings and then overrides
-  . $decompose_directory/environment/elements
+  if [ -e $decompose_directory/environment/elements ]; then
+    . $decompose_directory/environment/elements
+  fi
   if [ -e $decompose_directory/elements ]; then
     . $decompose_directory/elements
   fi

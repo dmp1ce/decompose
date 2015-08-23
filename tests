@@ -17,21 +17,30 @@ source "$DIR/completion/decompose-bash-completion-functions"
 
 # Make sure nothing is printed on stderr
 _decompose-test-no-stderr() {
-  output=$(./decompose 2>&1 1>/dev/null)
-  if [ -n "$output" ]; then
-    echo $output
+  local error_output=$(./decompose 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    echo "decompose had errors:"
+    echo $error_output
     return 1
   fi
   return 0
 }
 
-# Just check that help prints something
+# Test help function
 _decompose-test-help-test() {
-  output=$(decompose-print-help)
-  if [ -z "$ouput" ]; then
-    return 0
+  local output=$(decompose-print-help)
+  if [ ! -z "$ouput" ]; then
+    echo "Help didn't print anything"
+    return 1
   fi
-  return 1
+  local error_output=$(decompose-print-help 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    echo "Help had errors:"
+    echo $error_output
+    return 1
+  fi
+
+  return 0
 }
 
 _decompose-test-run-tests() {
