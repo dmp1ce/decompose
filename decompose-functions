@@ -125,7 +125,7 @@ decompose-init-environment() {
 
   # Copy environment files
   mkdir "$project_root/.decompose/environment"
-  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
   local environment_hash
   decompose-md5-hash $environment_url environment_hash
   cp -r "$decompose_data_dir/ecosphere/$environment_hash/"* "$project_root/.decompose/environment"
@@ -200,14 +200,14 @@ decompose-post-process-elements() {
 decompose-update-git-repository() {
   local git_repo_url=$1
 
-  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
 
   local git_repo_hash
   decompose-md5-hash $git_repo_url git_repo_hash
   if [ -d "$decompose_data_dir/ecosphere/$git_repo_hash" ]; then
     git -C "$decompose_data_dir/ecosphere/$git_repo_hash" pull
   else
-    git clone $git_repo_url \
+    git clone -q $git_repo_url \
       "$decompose_data_dir/ecosphere/$git_repo_hash"
   fi
 }
@@ -239,7 +239,7 @@ decompose-update-environment() {
   decompose-update-git-repository $environment_url
 
   # Update environment
-  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
   local decompose_directory
   _decompose-find-decompose-directory decompose_directory
   local environment_hash
@@ -289,11 +289,36 @@ decompose-bootstrap() {
     exit 1
   fi
 
-  local decompose_data_dir=$(realpath ~/.local/share/decompose)
+  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
   # Create ecosphere
   if [ ! -d "$decompose_data_dir/ecosphere" ]; then
     mkdir -p "$decompose_data_dir/ecosphere"
   fi
+}
+
+# Return the decompose global data directory
+# Will create the directory if it doesn't exist
+#
+# Parameters
+#   $1: return value (global data directory)
+decompose-global-data-dir() {
+  local __return_value=$1
+  local _data_directory="$HOME/.local/share/decompose"
+
+  if [ ! -d "$_data_directory" ]; then
+    echo "Creating global data directory: '$_data_directory'"
+    mkdir -p "$_data_directory"
+  fi
+  eval "$__return_value=$_data_directory"
+}
+
+# Return 1 if the function name passed in exists
+#
+# Parameters
+#   $1: function name to check
+decompose_function_exists() {
+    declare -f -F $1 > /dev/null
+    return $?
 }
 
 # Print dependencies that are missing
