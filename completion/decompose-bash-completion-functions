@@ -65,6 +65,8 @@ _decompose-process-names() {
 }
 
 # main
+# For help:
+# http://stackoverflow.com/questions/14513571/how-to-enable-default-file-completion-in-bash
 _decompose_complete() {
   local cur prev words cword
   _init_completion || return
@@ -74,6 +76,7 @@ _decompose_complete() {
 
   # Do if 2 words already exist
   if [ "$cword" -gt "1" ]; then
+    COMPREPLY=()
     return 0
   fi
 

@@ -12,4 +12,4 @@ DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
 
 source "$DIR/decompose-bash-completion-functions"
 
-complete -F _decompose_complete decompose
+complete -o default -F _decompose_complete decompose
