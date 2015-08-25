@@ -268,9 +268,14 @@ decompose-process-templates() {
   # Find all .mo files
   local project_root
   _decompose-project-root project_root
-  local templates=(
-    $(find $project_root -path "$project_root/.decompose" -prune -o -name "*.mo" -print)
-  )
+  local ignore_string=""
+  local i; for i in "${PROJECT_IGNORE_BUILD[@]}"; do
+    ignore_string="$ignore_string ! -path $i"
+  done
+
+  local find_results=$(find $project_root -path "$project_root/.decompose" \
+-prune -o $ignore_string -name "*.mo" -print)
+  local templates=( $find_results )
 
   # Process .mo files
   local t; for t in ${templates[@]}; do

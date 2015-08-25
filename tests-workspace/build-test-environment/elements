@@ -1,1 +1,5 @@
+PROJECT_IGNORE_BUILD=( "*/ignore_me/a_file.mo" "*/more.mo" )
+
 Testing="Hello"
+Hello="Hello there"
+# vim: syntax=sh
