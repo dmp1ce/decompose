@@ -21,7 +21,7 @@ The following is required:
 
 ### Manual install
 
-1. Clone this repository. (`$ git clone https://github.com/dmp1ce/decompose.git`)
+1. Clone this repository. (`$ git clone --recursive https://github.com/dmp1ce/decompose.git`)
 2. Symlink the `decompose` script to somewhere your `$PATH` can see it. For example: (`$ ln -s ~/decompose/decompose /usr/local/bin`)
 3. (Optional for tab completion) Symlink the `completion/decompose-bash-completion` to your bash completion directory. For example: (`$ ln -s ~/decompose/completion/decompose-bash-completion /usr/share/bash-completion/completions/decompose`)
 4. (Optional for man page) Install `txt2man` to build the man page.
