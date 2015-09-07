@@ -1,2 +1,2 @@
-- ignore some .mo files in build
-- allow tab completion of files after commands
+- ignore missing help functions
+- document 'magic' elements
