@@ -205,9 +205,11 @@ decompose-update-git-repository() {
   local git_repo_hash
   decompose-md5-hash $git_repo_url git_repo_hash
   if [ -d "$decompose_data_dir/ecosphere/$git_repo_hash" ]; then
-    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" pull
+    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" pull --recurse-submodules && \
+    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" submodule init && \
+    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" submodule update --recursive
   else
-    git clone -q $git_repo_url \
+    git clone --recursive -q $git_repo_url \
       "$decompose_data_dir/ecosphere/$git_repo_hash"
   fi
 }
