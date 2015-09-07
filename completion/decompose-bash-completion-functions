@@ -34,7 +34,11 @@ _decompose-project-root() {
 
   # We hit the end. See if we found .decompose or .decompose-init
   if [[ -d "$current_dir/.decompose" || -e "$current_dir/.decompose-init" ]]; then
-    eval "$__return_val=$current_dir"
+    if [ $# -eq 0 ]; then
+      echo "$current_dir"
+    else
+      eval "$__return_val=$current_dir"
+    fi
     return 0
   fi
   return 1

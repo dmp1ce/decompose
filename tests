@@ -169,10 +169,46 @@ _decompose-test-build-ignores-cleanup() {
   _decompose-test-building-test-cleanup
 }
 
+_decompose-test-project-root-param() {
+  # Create a build environment
+  _decompose-test-building-test
+  local error_code="$?"
+  if [ "$error_code" -gt "0" ]; then
+    echo "Build failed"
+    return 1
+  fi
+
+  # Change home and working directory
+  local HOME=$(realpath "./tests-workspace/user-home")
+
+  # Set current working directory
+  working_dir="./tests-workspace/build-test"
+
+  # Test function with parameter
+  project_root_param=$(cd $working_dir; local project_root; \
+    _decompose-project-root project_root; echo $project_root)
+  if [ -z "$project_root_param" ]; then
+    echo "_decompose-project-root returned emtpy parameter"
+    return 1
+  fi
+
+  # Test function without parameter
+  project_root_echo=$(cd $working_dir; _decompose-project-root)
+  if [ -z "$project_root_echo" ]; then
+    echo "_decompose-project-root returned emtpy echo"
+    return 1
+  fi
+
+  return 0
+}
+_decompose-test-project-root-param-cleanup() {
+  # Cleanup
+  _decompose-test-building-test-cleanup
+}
 
 _decompose-test-run-tests() {
   local _decompose_tests_to_run=( 'no-stderr' 'help-test' 'building-test'
-    'global-data-directory' 'build-ignores' )
+    'global-data-directory' 'build-ignores' 'project-root-param' )
   
   for test in ${_decompose_tests_to_run[@]}; do
     # Run test
