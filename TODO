@@ -1,2 +1,3 @@
 - ignore missing help functions
 - document 'magic' elements
+- Change .decompose/environment to be a submodule and initilize git on git init. Update will only update git submodule. Also remove .decompose-init file requirment.
