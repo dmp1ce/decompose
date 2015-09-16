@@ -129,7 +129,7 @@ _decompose-initialize-decompose-submodule() {
 
   mkdir "$git_root"/.decompose
   echo -n "$(cd "$git_root" && \
-    git submodule --quiet add "$environment_url" .decompose/environment && \
+    git submodule --quiet add -b master "$environment_url" .decompose/environment && \
     git submodule --quiet update --init --recursive .decompose/environment )"
 }
 
@@ -229,7 +229,7 @@ decompose-update-environment() {
   # Update environment
   local git_root; _decompose-git-root git_root
   echo -n "$(cd "$git_root" && \
-    git submodule --quiet update --recursive .decompose/environment )"
+    git submodule --quiet update --init --remote --recursive .decompose/environment )"
 }
 
 # Build project files from templates
