@@ -221,13 +221,11 @@ decompose-update-environment() {
 
   #local environment_url=$(cat "$project_root/.decompose-init")
 
-  # If .decompose directory doesn't exist initialize .decompose directory
   decompose-directory-exists
   if [ "$?" -gt "0" ]; then
-    # Initialize .decompose
-    decompose-init-environment $environment_url
-
-    return "$?"
+    decompose_echoerr "decompose has not been initialized"
+    decompose_echoerr "Try 'decompose --init <git-url>'"
+    return 1
   fi
 
   # Update environment

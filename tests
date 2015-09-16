@@ -233,6 +233,29 @@ _decompose-test-init-git-exists-cleanup() {
   _decompose-test-initialize-environment-cleanup
 }
 
+_decompose-test-update-fail-no-init() {
+  # Make and set home directory
+  mkdir "./tests-workspace/user-home"
+  local HOME=$(realpath "./tests-workspace/user-home")
+
+  # Set current working directory
+  local working_dir="./tests-workspace/build-test"
+  mkdir "./tests-workspace/build-test"
+
+  # Update build test enviornment
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    decompose --update 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    return 0
+  fi
+
+  decompose-echoerr "Expected error from 'decompose --update' but did not see error"
+  return 1
+}
+_decompose-test-update-fail-no-init-cleanup() {
+  _decompose-test-initialize-environment-cleanup
+}
+
 _decompose-test-initialize-environment() {
   # Make and set home directory
   mkdir "./tests-workspace/user-home"
@@ -267,21 +290,26 @@ _decompose-test-initialize-environment-cleanup() {
   $(cd $HOME; mv .local /tmp/$(uuidgen))
 
   # Cleanup environment data
-  mv "tests-workspace/build-test" "/tmp/$(uuidgen)"
+  test -d "tests-workspace/build-test" && \
+    mv "tests-workspace/build-test" "/tmp/$(uuidgen)"
 
   # Cleanup git repository
+  test -d "tests-workspace/build-test-environment/.git" && \
   mv "./tests-workspace/build-test-environment/.git" "/tmp/$(uuidgen)"
 
   # Cleanup home .gitconfig
-  rm "$HOME/.gitconfig"
-  rmdir "$HOME"
+  test -f "$HOME/.gitconfig" && rm "$HOME/.gitconfig"
+  test -d "$HOME" && rmdir "$HOME"
 }
+
+
 
 
 _decompose-test-run-tests() {
   local _decompose_tests_to_run=( 'no-stderr' 'help-test' 'building-test'
     'global-data-directory' 'build-ignores' 'project-root-param'
-    'decompose-init-fail' 'initialize-environment' 'init-git-exists' )
+    'decompose-init-fail' 'initialize-environment' 'init-git-exists'
+    'update-fail-no-init' )
   
   for test in ${_decompose_tests_to_run[@]}; do
     # Run test
