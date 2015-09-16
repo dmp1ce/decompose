@@ -27,13 +27,12 @@ _decompose-project-root() {
   local __return_val=$1
   local current_dir=$(realpath .)
   while [[ ! -d "$current_dir/.decompose" && \
-    ! -e "$current_dir/.decompose-init" &&  \
     "$current_dir" != "/" ]]; do
     current_dir=$(realpath $current_dir/../)
   done
 
-  # We hit the end. See if we found .decompose or .decompose-init
-  if [[ -d "$current_dir/.decompose" || -e "$current_dir/.decompose-init" ]]; then
+  # We hit the end. See if we found .decompose
+  if [[ -d "$current_dir/.decompose" ]]; then
     if [ $# -eq 0 ]; then
       echo "$current_dir"
     else

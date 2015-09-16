@@ -90,45 +90,67 @@ decompose-init-environment() {
 
   # Is environment parameter valid?
   if [ -z "$environment_url" ]; then
-    echo "Please supply an environment url to initialize"
+    decompose_echoerr "Please supply an environment url to initialize"
     return 1
   fi
 
-  # Update git repository
-  decompose-update-git-repository $environment_url
+  echo "Initializing environment..."
 
-  # Copy files from clone to .decompose
-  # Is environment created already?
-  local decompose_directory
-  _decompose-find-decompose-directory decompose_directory
-  if [ -d "$decompose_directory" ]; then
-    echo ".decompose directory already exists here:"
-    echo "$decompose_directory"
-    exit 1
+  # If .decompose already exists then we shouldn't init
+  local project_root; _decompose-project-root project_root
+  if [ -d "$project_root" ]; then
+    decompose_echoerr ".decompose directory already exists. Aborting init."
+    return 1
   fi
 
-  echo "Initializing environment"
-
-  # If .decompose-init exists then put .decompose in the right place
-  local project_root
-  _decompose-project-root project_root
-  if [ "$?" -gt "0" ]; then
-    mkdir ".decompose"
-    # Save .decompose-init
-    echo "$environment_url" > .decompose-init
-  else
-    mkdir "$project_root/.decompose"
+  # If .git exists then add decompose as a submodule
+  local git_root; _decompose-git-root git_root
+  if [ -d "$git_root" ]; then
+    _decompose-initialize-decompose-submodule "$git_root"
+    return $?
   fi
 
-  # Project root will definetly exist now.
-  _decompose-project-root project_root
+  # If neither .git or .decompose exist then initialize git and create decompose directory
+  git init
+  _decompose-initialize-decompose-submodule "./"
+  return $?
+}
 
-  # Copy environment files
-  mkdir "$project_root/.decompose/environment"
-  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
-  local environment_hash
-  decompose-md5-hash $environment_url environment_hash
-  cp -r "$decompose_data_dir/ecosphere/$environment_hash/"* "$project_root/.decompose/environment"
+# Initialize the .decompose environment submodule
+#
+#   $1: Git root
+_decompose-initialize-decompose-submodule() {
+  local git_root=$(realpath $1)
+  # If git_root doesn't exist then abort
+  if [ ! -d "$git_root" ]; then
+    echo "Couldn't initialize .decompose because git root doesn't exist."
+    return 1
+  fi
+
+  mkdir "$git_root"/.decompose
+  echo "$(cd "$git_root" && \
+    git submodule --quiet add "$environment_url" .decompose/environment && \
+    git submodule update --init --recursive .decompose/environment )"
+}
+
+# Returns the git root directory
+#
+# Parameters:
+#   $1: return value (project git location)
+_decompose-git-root() {
+  local __return_val=$1
+  local git_root=$(git rev-parse --show-toplevel 2>/dev/null)
+
+  # If git root exists then return it
+  if [ -d "$git_root" ]; then
+    if [ $# -eq 0 ]; then
+      echo "$git_root"
+    else
+      eval "$__return_val=$git_root"
+    fi
+    return 0
+  fi
+  return 1
 }
 
 # Initialize environment command
@@ -193,40 +215,11 @@ decompose-post-process-elements() {
   done
 }
 
-# Updates a git repository
-#
-# Parameters
-#   $1: git repository URL
-decompose-update-git-repository() {
-  local git_repo_url=$1
-
-  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
-
-  local git_repo_hash
-  decompose-md5-hash $git_repo_url git_repo_hash
-  if [ -d "$decompose_data_dir/ecosphere/$git_repo_hash" ]; then
-    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" pull --recurse-submodules && \
-    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" submodule init && \
-    git -C "$decompose_data_dir/ecosphere/$git_repo_hash" submodule update --recursive
-  else
-    git clone --recursive -q $git_repo_url \
-      "$decompose_data_dir/ecosphere/$git_repo_hash"
-  fi
-}
-
 # Updates decompose environment
 decompose-update-environment() {
-  # If .decompose-init doesn't exist then there is nothing we can do
-  local project_root
-  _decompose-project-root project_root
-  if [ ! -e "$project_root/.decompose-init" ]; then
-    echo "Cannot update '.decompose' because '.decompose-init' is missing"
-    echo "Create a '.decompose-init' file with the URL to the environment URL"
-    echo "Or delete the '.decompose' directory and run 'decompose --init' again"
-    exit 1
-  fi
+  local project_root; _decompose-project-root project_root
 
-  local environment_url=$(cat "$project_root/.decompose-init")
+  #local environment_url=$(cat "$project_root/.decompose-init")
 
   # If .decompose directory doesn't exist initialize .decompose directory
   decompose-directory-exists
@@ -236,9 +229,6 @@ decompose-update-environment() {
 
     return "$?"
   fi
-
-  # Update git repository
-  decompose-update-git-repository $environment_url
 
   # Update environment
   local decompose_data_dir; decompose-global-data-dir decompose_data_dir
@@ -328,6 +318,9 @@ decompose_function_exists() {
     return $?
 }
 
+# Echo to stderr
+decompose_echoerr() { echo "$@" 1>&2; }
+
 # Print dependencies that are missing
 decompose-verify-dependencies() {
   local return_code
@@ -354,7 +347,7 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.13"
+  local version="0.14"
   echo "decompose v$version"
 }
 # vim:syntax=sh

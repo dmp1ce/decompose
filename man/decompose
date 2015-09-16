@@ -11,8 +11,7 @@ DESCRIPTION
 
   How to use decompose: 
   Initialize  Normal usage of decompose is to first either initialize the
-    development environment with the [--init] command or if the .decompose-init
-    file exists in the project run the update command [--update].
+    development environment with the [--init] command
   Commands and templates  After the decompose environment is initalized,
     elements and processes will be available. This means that the build command
     [--build] will work to convert .mo template files into a file without a .mo

@@ -45,29 +45,7 @@ _decompose-test-help-test() {
 
 # Building test
 _decompose-test-building-test() {
-  # Make and set home directory
-  mkdir "./tests-workspace/user-home"
-  local HOME=$(realpath "./tests-workspace/user-home")
-
-  # Set current working directory
-  working_dir="./tests-workspace/build-test"
-  mkdir "./tests-workspace/build-test"
-
-  # Setup git repository
-  git config --global user.email "tester@example.com"
-  git config --global user.name "tester"
-  git -C "./tests-workspace/build-test-environment" init >/dev/null
-  git -C "./tests-workspace/build-test-environment" add .
-  git -C "./tests-workspace/build-test-environment" commit -m "Initial commit" >/dev/null
-
-  # Init build test enviornment
-  local error_output=$(export HOME=$HOME && cd $working_dir && \
-    decompose --init "../build-test-environment" 2>&1 1>/dev/null)
-  if [ -n "$error_output" ]; then
-    echo "'decompose --init' had errors"
-    echo "$error_output"
-    return 1
-  fi
+  _decompose-test-initialize-environment
 
   # Run Build
   local error_output=$(export HOME=$HOME && cd $working_dir && \
@@ -87,21 +65,7 @@ _decompose-test-building-test() {
   return 0
 }
 _decompose-test-building-test-cleanup() {
-  # Home directory
-  local HOME="$(realpath ./tests-workspace/user-home)"
-
-  # Cleanup global data
-  $(cd $HOME; mv .local /tmp/$(uuidgen))
-
-  # Cleanup environment data
-  mv "tests-workspace/build-test" "/tmp/$(uuidgen)"
-
-  # Cleanup git repository
-  mv "./tests-workspace/build-test-environment/.git" "/tmp/$(uuidgen)"
-
-  # Cleanup home .gitconfig
-  rm "$HOME/.gitconfig"
-  rmdir "$HOME"
+  _decompose-test-initialize-environment-cleanup
 }
 
 # Global data directory creation and location
@@ -206,9 +170,118 @@ _decompose-test-project-root-param-cleanup() {
   _decompose-test-building-test-cleanup
 }
 
+_decompose-test-decompose-init-fail() {
+  _decompose-test-initialize-environment
+
+  # Try to initialize the environment again
+  # Make and set home directory
+  local HOME=$(realpath "./tests-workspace/user-home")
+
+  # Set current working directory
+  working_dir="./tests-workspace/build-test"
+
+  # Init build test enviornment
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    decompose --init "../build-test-environment" 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    return 0
+  fi
+
+  decompose_echoerr "Expected error message from decompose --init but didn't receive one"
+  return 1
+}
+_decompose-test-decompose-init-fail-cleanup() {
+  _decompose-test-initialize-environment-cleanup
+}
+
+_decompose-test-init-git-exists() {
+  # Make and set home directory
+  mkdir "./tests-workspace/user-home"
+  local HOME=$(realpath "./tests-workspace/user-home")
+
+  # Set current working directory
+  local working_dir="./tests-workspace/build-test"
+  mkdir "./tests-workspace/build-test"
+
+  # Setup git repository
+  local git_url=$(realpath ./tests-workspace/build-test-environment)
+  git config --global user.email "tester@example.com"
+  git config --global user.name "tester"
+  git -C "$git_url" init >/dev/null
+  git -C "$git_url" add .
+  git -C "$git_url" commit -m "Initial commit" >/dev/null
+
+  # Initialize git before doing decompose --init
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    git init && mkdir "test" && touch "test/hello.txt" && \
+    git commit -m "Initial commit" 2>&1 1>/dev/null)
+  # Change working directory
+  local working_dir="$working_dir"/test
+
+  # Init build test enviornment
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    decompose --init "$git_url" 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    echo "'decompose --init' had errors"
+    echo "$error_output"
+    return 1
+  fi
+
+  return 0
+}
+_decompose-test-init-git-exists-cleanup() {
+  _decompose-test-initialize-environment-cleanup
+}
+
+_decompose-test-initialize-environment() {
+  # Make and set home directory
+  mkdir "./tests-workspace/user-home"
+  local HOME=$(realpath "./tests-workspace/user-home")
+
+  # Set current working directory
+  working_dir="./tests-workspace/build-test"
+  mkdir "./tests-workspace/build-test"
+
+  # Setup git repository
+  local git_url=$(realpath ./tests-workspace/build-test-environment)
+  git config --global user.email "tester@example.com"
+  git config --global user.name "tester"
+  git -C "$git_url" init >/dev/null
+  git -C "$git_url" add .
+  git -C "$git_url" commit -m "Initial commit" >/dev/null
+
+  # Init build test enviornment
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    decompose --init "$git_url" 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    echo "'decompose --init' had errors"
+    echo "$error_output"
+    return 1
+  fi
+}
+_decompose-test-initialize-environment-cleanup() {
+  # Home directory
+  local HOME="$(realpath ./tests-workspace/user-home)"
+
+  # Cleanup global data
+  $(cd $HOME; mv .local /tmp/$(uuidgen))
+
+  # Cleanup environment data
+  mv "tests-workspace/build-test" "/tmp/$(uuidgen)"
+
+  # Cleanup git repository
+  mv "./tests-workspace/build-test-environment/.git" "/tmp/$(uuidgen)"
+
+  # Cleanup home .gitconfig
+  rm "$HOME/.gitconfig"
+  rmdir "$HOME"
+}
+
+
 _decompose-test-run-tests() {
   local _decompose_tests_to_run=( 'no-stderr' 'help-test' 'building-test'
-    'global-data-directory' 'build-ignores' 'project-root-param' )
+    'global-data-directory' 'build-ignores' 'project-root-param'
+    'decompose-init-fail' 'initialize-environment' 'init-git-exists' )
   
   for test in ${_decompose_tests_to_run[@]}; do
     # Run test
