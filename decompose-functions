@@ -128,9 +128,9 @@ _decompose-initialize-decompose-submodule() {
   fi
 
   mkdir "$git_root"/.decompose
-  echo "$(cd "$git_root" && \
+  echo -n "$(cd "$git_root" && \
     git submodule --quiet add "$environment_url" .decompose/environment && \
-    git submodule update --init --recursive .decompose/environment )"
+    git submodule --quiet update --init --recursive .decompose/environment )"
 }
 
 # Returns the git root directory
@@ -217,10 +217,6 @@ decompose-post-process-elements() {
 
 # Updates decompose environment
 decompose-update-environment() {
-  local project_root; _decompose-project-root project_root
-
-  #local environment_url=$(cat "$project_root/.decompose-init")
-
   decompose-directory-exists
   if [ "$?" -gt "0" ]; then
     decompose_echoerr "decompose has not been initialized"
@@ -228,18 +224,12 @@ decompose-update-environment() {
     return 1
   fi
 
+  local project_root; _decompose-project-root project_root
+
   # Update environment
-  local decompose_data_dir; decompose-global-data-dir decompose_data_dir
-  local decompose_directory
-  _decompose-find-decompose-directory decompose_directory
-  local environment_hash
-  decompose-md5-hash $environment_url environment_hash
-  if [ -n "$decompose_directory" ]; then
-    rm -r $decompose_directory/environment
-    mkdir -p $decompose_directory/environment
-    cp -r $decompose_data_dir/ecosphere/$environment_hash/* \
-      $decompose_directory/environment
-  fi
+  local git_root; _decompose-git-root git_root
+  echo -n "$(cd "$git_root" && \
+    git submodule --quiet update --recursive .decompose/environment )"
 }
 
 # Build project files from templates
