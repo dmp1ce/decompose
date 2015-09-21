@@ -6,6 +6,7 @@
 - Create decompose init script to run when 'decompose --init' is run. Allow it to prompt user to change the environment based on user input.
 - Think about how elements and processes files should be auto genearted in project root and .decompose folder. What is private and what is not?
 - Organize processes alphabetically
+- Add a '--clean' command to remove all files generated form *.mo templates
 
 # Tests
 
