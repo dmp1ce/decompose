@@ -176,7 +176,7 @@ decompose-init-command() {
   fi
 
   # Copy skeleton to working directory
-  cp -r .decompose/environment/skel/. ./
+  cp -rL .decompose/environment/skel/. ./
 }
 
 # Return 0 if .decompose exists, else return 1
