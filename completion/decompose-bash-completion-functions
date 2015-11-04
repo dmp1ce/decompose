@@ -75,7 +75,7 @@ _decompose_complete() {
   _init_completion || return
 
   local processes=$(_decompose-process-names)
-  local commands="--init --update --build --version --help"
+  local commands="--init --update --build --clean --version --help"
 
   # Do if 2 words already exist
   if [ "$cword" -gt "1" ]; then
