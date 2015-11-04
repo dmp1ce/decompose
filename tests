@@ -302,14 +302,43 @@ _decompose-test-initialize-environment-cleanup() {
   test -d "$HOME" && rmdir "$HOME"
 }
 
+_decompose-test-clean-removes-generated-files() {
+  # Build environment
+  _decompose-test-building-test
+  local error_code="$?"
+  if [ "$error_code" -gt "0" ]; then
+    echo "Build failed"
+    return 1
+  fi
 
+  # Run clean
+  local error_output=$(export HOME=$HOME && cd $working_dir && \
+    decompose --clean 2>&1 1>/dev/null)
+  if [ -n "$error_output" ]; then
+    echo "'decompose --clean' had errors"
+    echo "$error_output"
+    return 1
+  fi
 
+  # Verify generated files are no longer
+  if [[ -f "./tests-workspace/build-test/testing" || \
+    -f "./tests-workspace/build-test/123" ]]; then
+    echo "'decompose --clean' did not clean generated files"
+    return 1
+  fi
+
+  return 0
+}
+_decompose-test-clean-removes-generated-files-cleanup() {
+  # Cleanup
+  _decompose-test-building-test-cleanup
+}
 
 _decompose-test-run-tests() {
   local _decompose_tests_to_run=( 'no-stderr' 'help-test' 'building-test'
     'global-data-directory' 'build-ignores' 'project-root-param'
     'decompose-init-fail' 'initialize-environment' 'init-git-exists'
-    'update-fail-no-init' )
+    'update-fail-no-init' 'clean-removes-generated-files')
   
   for test in ${_decompose_tests_to_run[@]}; do
     # Run test

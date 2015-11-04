@@ -15,6 +15,8 @@ decompose-parse-parameters() {
       decompose-update-environment;;
     "--build")
       decompose-build;;
+    "--clean")
+      decompose-clean;;
     "--version")
       decompose-version;;
     "--help")
@@ -51,6 +53,8 @@ Core commands:
   Update the current environment
 --build
   Build project files from templates
+--clean
+  Removed project files generated from templates
 --version
   Print version
 --help
@@ -243,6 +247,17 @@ decompose-build() {
   decompose-process-templates
 }
 
+# Clean project files generated from templates
+decompose-clean() {
+  echo "Cleaning project files generated from templates"
+
+  # Get elements
+  decompose-load-elements
+
+  # Process templates
+  decompose-clean-generated-files
+}
+
 # Process .mo files
 decompose-process-templates() {
   # Find all .mo files
@@ -262,6 +277,27 @@ decompose-process-templates() {
     cat $t | . "$DIR/mo/mo" > ${t%.*}
     chmod --reference $t ${t%.*}
     echo "$t -> ${t%.*}"
+  done
+}
+
+# Clean files generated from .mo files
+decompose-clean-generated-files() {
+  # Find all .mo files
+  local project_root
+  _decompose-project-root project_root
+  local ignore_string=""
+  local i; for i in "${PROJECT_IGNORE_BUILD[@]}"; do
+    ignore_string="$ignore_string ! -path $i"
+  done
+
+  local find_results=$(find $project_root -path "$project_root/.decompose" \
+-prune -o $ignore_string -name "*.mo" -print)
+  local templates=( $find_results )
+
+  # Process .mo files
+  local t; for t in ${templates[@]}; do
+    rm ${t%.*}
+    echo "Deleted ${t%.*}"
   done
 }
 
@@ -335,7 +371,7 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.14"
+  local version="0.15"
   echo "decompose v$version"
 }
 # vim:syntax=sh
