@@ -2,6 +2,13 @@
 
 # Test current environment
 
+@test "'realpath' exists" {
+  run realpath --version
+
+  echo "$output"
+  [ "$status" -eq 0 ]
+}
+
 @test "'uuidgen' exists" {
   run uuidgen
   
