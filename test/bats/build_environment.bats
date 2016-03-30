@@ -22,11 +22,11 @@ function setup() {
 
   # Setup git repository
   local git_url=$(realpath $tmpdir/build-test-environment)
-  git config --global user.email "tester@example.com"
-  git config --global user.name "tester"
-  git -C "$git_url" init >/dev/null
+  git -C "$git_url" init
+  git -C "$git_url" config user.email "tester@example.com"
+  git -C "$git_url" config user.name "tester"
   git -C "$git_url" add .
-  git -C "$git_url" commit -m "Initial commit" >/dev/null
+  git -C "$git_url" commit -m "Initial commit"
 
   # Init build and initialize environment
   local error_output=$(export HOME=$HOME && cd $WORKING && \
@@ -59,8 +59,12 @@ function teardown() {
   [[ $HOME == /tmp/* ]]
 }
 @test "git initialized in setup" {
-  run git config --list
-  [ ${lines[0]} == "user.email=tester@example.com" ]
+  local tmpdir=$(echo_tmpdir)
+  local git_url=$(realpath $tmpdir/build-test-environment)
+  run git -C "$git_url" config --list
+  echo "$output"
+  [ ${#lines[@]} -gt 3 ]
+  [ ${lines[4]} == "user.email=tester@example.com" ]
 }
 
 @test "decompose runs with no error" {
