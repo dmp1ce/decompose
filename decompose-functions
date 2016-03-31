@@ -19,7 +19,7 @@ decompose-parse-parameters() {
       decompose-clean;;
     "--version")
       decompose-version;;
-    "--help")
+    "--help"|"")
       decompose-print-help;;
     "--completion")
       decompose-completion;;
@@ -29,12 +29,13 @@ decompose-parse-parameters() {
         if [ "$1" == "$p" ]; then
           decompose-load-elements
           _decompose-process-$p "${@:2}"
-          exit 0
+          exit $?
         fi
       done
 
       echo "Unknown parameter '$1'"
       decompose-print-help
+      exit 1
       ;;
   esac
 }
@@ -371,7 +372,7 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.15"
+  local version="0.16"
   echo "decompose v$version"
 }
 # vim:syntax=sh

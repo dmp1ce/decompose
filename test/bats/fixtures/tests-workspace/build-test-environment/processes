@@ -1,0 +1,11 @@
+# Declare processes
+DECOMPOSE_PROCESSES=( 'failed_process' )
+
+_decompose-process-failed_process() {
+  return 1
+}
+_decompose-process-failed_process_help() {
+  echo "  Returns error code of 1"
+}
+
+# vim:syntax=sh

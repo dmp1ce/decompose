@@ -1,5 +1,7 @@
 #!/usr/bin/env bats
 
+# Tests that require a build environment
+
 function echo_tmpdir() {
   echo "$BATS_TMPDIR/$BATS_TEST_NAME"
 }
@@ -67,7 +69,7 @@ function teardown() {
   [ ${lines[4]} == "user.email=tester@example.com" ]
 }
 
-@test "decompose runs with no error" {
+@test "decompose runs with no error (if no parameter is giving)" {
   run decompose
 
   echo "$output"
@@ -131,6 +133,24 @@ function teardown() {
   echo "$output"
   [ "$status" -ne 0 ] 
   [ "${lines[1]}" == ".decompose directory already exists. Aborting init." ]
+}
+
+@test "Returns error code of the process" {
+  cd "$WORKING"
+
+  run decompose failed_process
+
+  echo "$output"
+  [ "$status" -eq 1 ]
+}
+
+@test "Missing process return error code of 1" {
+  cd "$WORKING"
+
+  run decompose missing_process
+
+  echo "$output"
+  [ "$status" -eq 1 ]
 }
 
 # vim:syntax=sh tabstop=2 shiftwidth=2 expandtab
