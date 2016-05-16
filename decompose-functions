@@ -182,6 +182,14 @@ decompose-init-command() {
 
   # Copy skeleton to working directory
   cp -rL .decompose/environment/skel/. ./
+
+  # Add skeleton submodules
+  if [ -f .decompose/environment/skel-submodules.csv ]; then
+    local submodule_csv=$(cat .decompose/environment/skel-submodules.csv)
+
+    echo "$submodule_csv" | awk -F, '{ system("git submodule add "$2" "$1) }' &>/dev/null
+    git submodule update --init --recursive &>/dev/null
+  fi
 }
 
 # Return 0 if .decompose exists, else return 1
@@ -375,4 +383,4 @@ decompose-version() {
   local version="0.16"
   echo "decompose v$version"
 }
-# vim:syntax=sh
+# vim:syntax=sh tabstop=2 shiftwidth=2 expandtab

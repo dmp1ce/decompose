@@ -2,52 +2,7 @@
 
 # Tests that require a build environment
 
-function echo_tmpdir() {
-  echo "$BATS_TMPDIR/$BATS_TEST_NAME"
-}
-
-function setup() {
-  # Directory for setting up tests
-  local tmpdir=$(echo_tmpdir)
-  mkdir -p "$tmpdir"
- 
-  # Setup build test environment
-  cp -r "$BATS_TEST_DIRNAME/fixtures/tests-workspace/." "$tmpdir"
-
-  # Make and set home directory
-  mkdir -p "$tmpdir/user-home"
-  export HOME=$(realpath "$(echo_tmpdir)/user-home")
-
-  # Set current working directory
-  export WORKING="$tmpdir/build-test"
-  mkdir -p "$tmpdir/build-test"
-
-  # Setup git repository
-  local git_url=$(realpath $tmpdir/build-test-environment)
-  git -C "$git_url" init
-  git -C "$git_url" config user.email "tester@example.com"
-  git -C "$git_url" config user.name "tester"
-  git -C "$git_url" add .
-  git -C "$git_url" commit -m "Initial commit"
-
-  # Init build and initialize environment
-  local error_output=$(export HOME=$HOME && cd $WORKING && \
-    decompose --init "$git_url" 2>&1 1>/dev/null)
-  if [ -n "$error_output" ]; then
-    echo "'decompose --init' had errors"
-    echo "$error_output"
-    return 1
-  fi
-}
-
-function teardown() {
-  # Directory for setting up tests
-  local tmpdir=$(echo_tmpdir)
-
-  # Move generated test files to random temporary
-  # directory where it will eventually be cleaned up
-  mv "$tmpdir" "$tmpdir-$(uuidgen)"
-}
+load "$BATS_TEST_DIRNAME/bats_functions.bash"
 
 # Verify setup worked correctly with some basic tests
 @test "'WORKING' variable is setup" {

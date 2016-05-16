@@ -50,6 +50,13 @@ function run_tests() {
   
   echo -e "\nBuild environment tests"
   $tester_image bats /app/test/bats/build_environment.bats
+  local return_code+=$?
+
+  echo -e "\nSkeleton tests"
+  $tester_image bats /app/test/bats/skeleton.bats
+  local return_code+=$?
+  $tester_image bats /app/test/bats/init-remote-submodule.bats
+  local return_code+=$?
 
   return "$return_code"
 }
