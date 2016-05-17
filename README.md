@@ -68,6 +68,17 @@ Init will download and prepare an environment from and environment template. Env
 Example:
 `$ decompose --init https://github.com/dmp1ce/decompose-hello-world.git`
 
+By default, the init process simply copies files from the skeleton directory to the project root directory.
+
+#### Init submodules
+
+To initialize git submodules within the project root on init a `skel-submodules.csv` can be used to specify the submodules. The `skel-submodules.csv` file is a comma seperate file with two columns. The first column is the local path to the submodule. The second column is the git URL to the submodule repository. Each row specifies a submodule. For example, the `skel-submodules.csv` file could look like this:
+
+``` csv
+submodule1,https://github.com/a_user/submodule1.git
+example/decompose_project,https://github.com/dmp1ce/decompose.git
+```
+
 ### Update
 
 Update will update the environment template default elements and processes. Update will not automatically update template files as they are intended to be changed during development.
