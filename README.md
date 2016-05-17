@@ -79,6 +79,8 @@ submodule1,https://github.com/a_user/submodule1.git
 example/decompose_project,https://github.com/dmp1ce/decompose.git
 ```
 
+The `skel-submodules.csv` file must be located at `.decompose/environment/skel-submodules.csv`.
+
 ### Update
 
 Update will update the environment template default elements and processes. Update will not automatically update template files as they are intended to be changed during development.
