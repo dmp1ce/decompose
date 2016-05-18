@@ -55,6 +55,14 @@ function setup() {
   touch "$tmpdir/submodule-test2/bfile"
   git -C "$tmpdir/submodule-test2" add bfile
   git -C "$tmpdir/submodule-test2" commit -m "Initial commit 2"
+  mkdir "$tmpdir/submodule-test3"
+  git -C "$tmpdir/submodule-test3" init
+  git -C "$tmpdir/submodule-test3" config user.email "tester@example.com"
+  git -C "$tmpdir/submodule-test3" config user.name "tester"
+  touch "$tmpdir/submodule-test3/cfile"
+  git -C "$tmpdir/submodule-test3" add cfile
+  git -C "$tmpdir/submodule-test3" commit -m "Initial commit 3"
+
 
   # Make and set home directory
   mkdir -p "$tmpdir/user-home"

@@ -13,4 +13,20 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
   [ -d "$WORKING/submodule-test2" ]
 }
 
+@test "'--init' create skeleton submodule with space in path" {
+  cd "$WORKING"
+  ls
+
+  echo "$output"
+  [ -d "$WORKING/submodule test with space" ]
+}
+
+@test "'--init' create skeleton symlinks" {
+  [ -L "$WORKING/symlink-test" ]
+}
+
+@test "'--init' create skeleton symlinks with spaces in path and name" {
+  [ -L "$WORKING/symlink test with space" ]
+}
+
 # vim:syntax=sh tabstop=2 shiftwidth=2 expandtab

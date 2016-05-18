@@ -81,6 +81,17 @@ example/decompose_project,https://github.com/dmp1ce/decompose.git
 
 The `skel-submodules.csv` file must be located at `.decompose/environment/skel-submodules.csv`.
 
+#### Init symlinks
+
+To initialize symlinks within the project root on init a `skel-symlinks.csv` can be used to specify the symlinks. The `skel-symlinks.csv` file is a comma seperate file with two columns. The first column is the symlink name. The second column is the symlink target path to the file or directory. Each row specifies a symlink. For example, the `skel-symlinks.csv` file could look like this:
+
+``` csv
+symlink1,a_directory
+important_file.txt,a/important/file/here.txt
+```
+
+The `skel-symlinks.csv` file must be located at `.decompose/environment/skel-symlinks.csv`.
+
 ### Update
 
 Update will update the environment template default elements and processes. Update will not automatically update template files as they are intended to be changed during development.
