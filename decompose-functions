@@ -391,7 +391,7 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.17"
+  local version="0.18"
   echo "decompose v$version"
 }
 # vim:syntax=sh tabstop=2 shiftwidth=2 expandtab
