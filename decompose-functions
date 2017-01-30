@@ -295,10 +295,27 @@ decompose-process-templates() {
   # Process .mo files
   local t; for t in ${templates[@]}; do
     cat $t | . "$DIR/mo/mo" > ${t%.*}
-    chmod $(stat -f "%p" "$t") $t ${t%.*}
+    _decompose-chmod-reference $t ${t%.*}
     echo "$t -> ${t%.*}"
   done
 }
+
+
+# chmod file using another file as reference
+#
+# Parameters
+#   $1: Reference file
+#   $2: File to chmod
+_decompose-chmod-reference() {
+  case $OSTYPE in
+    darwin*) chmod $(stat -f "%p" "$1") $2;;
+    linux-gnu) chmod --reference $1 $2;;
+    *) echo "Error matching OSTYPE"
+       exit 1
+       ;;
+  esac
+}
+
 
 # Clean files generated from .mo files
 decompose-clean-generated-files() {
@@ -391,7 +408,7 @@ decompose-verify-dependencies() {
 
 # Print version
 decompose-version() {
-  local version="0.18"
+  local version="0.18.1"
   echo "decompose v$version"
 }
 # vim:syntax=sh tabstop=2 shiftwidth=2 expandtab

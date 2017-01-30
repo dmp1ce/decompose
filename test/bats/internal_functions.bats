@@ -48,6 +48,24 @@ load "$BATS_TEST_DIRNAME/../../completion/decompose-bash-completion-functions"
   mv "$BATS_TMPDIR/$BATS_TEST_NAME" "$BATS_TMPDIR/$BATS_TEST_NAME"-$(uuidgen)
 }
 
+@test "internal function '_decompose-chmod-reference' with valid parameters" {
+  mkdir -p "$BATS_TMPDIR/$BATS_TEST_NAME"
+  cd "$BATS_TMPDIR/$BATS_TEST_NAME"
+  touch test-reference
+  touch test2
 
+  # Simply test to see if 'stat' and 'chmod' work in this environment
+  run _decompose-chmod-reference test-reference test2
+
+  # Cleanup a bit after running test
+  rm test-reference
+  rm test2
+  cd "$BATS_TMPDIR"
+  rmdir "$BATS_TMPDIR/$BATS_TEST_NAME"
+
+  # Verify that the test passed
+  echo "$output"
+  [ "$status" -eq 0 ]
+}
 
 # vim:syntax=sh tabstop=2 shiftwidth=2 expandtab
