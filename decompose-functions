@@ -295,7 +295,7 @@ decompose-process-templates() {
   # Process .mo files
   local t; for t in ${templates[@]}; do
     cat $t | . "$DIR/mo/mo" > ${t%.*}
-    chmod --reference $t ${t%.*}
+    chmod $(stat -f "%p" "$t") $t ${t%.*}
     echo "$t -> ${t%.*}"
   done
 }
