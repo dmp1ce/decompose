@@ -300,7 +300,6 @@ decompose-process-templates() {
   done
 }
 
-
 # chmod file using another file as reference
 #
 # Parameters
@@ -309,13 +308,12 @@ decompose-process-templates() {
 _decompose-chmod-reference() {
   case $OSTYPE in
     darwin*) chmod $(stat -f "%p" "$1") $2;;
-    linux-gnu) chmod --reference $1 $2;;
-    *) echo "Error matching OSTYPE"
+    linux*) chmod --reference $1 $2;;
+    *) echo "Error matching OSTYPE: '$OSTYPE'"
        exit 1
        ;;
   esac
 }
-
 
 # Clean files generated from .mo files
 decompose-clean-generated-files() {
