@@ -28,7 +28,8 @@ load "$BATS_TEST_DIRNAME/../../completion/decompose-bash-completion-functions"
   _decompose-project-root project_root
 
   echo $project_root
-  [ "$project_root" == "$WORKING" ]
+  echo $WORKING
+  [ "$project_root" == $(realpath "$WORKING") ]
 
   mv "$BATS_TMPDIR/$BATS_TEST_NAME" "$BATS_TMPDIR/$BATS_TEST_NAME"-$(uuidgen)
 }
@@ -43,7 +44,7 @@ load "$BATS_TEST_DIRNAME/../../completion/decompose-bash-completion-functions"
 
   # Using the function without parameter should echo working directory.
   project_root_echo=$(cd $WORKING; _decompose-project-root)
-  [ "$project_root_echo" == "$WORKING" ]
+  [ "$project_root_echo" == $(realpath "$WORKING") ]
 
   mv "$BATS_TMPDIR/$BATS_TEST_NAME" "$BATS_TMPDIR/$BATS_TEST_NAME"-$(uuidgen)
 }
