@@ -9,5 +9,8 @@ The change log is available [on GitHub][2].
 
 ## v0.18.1
 
+* Fix some bats tests to work on Macs
+* Fix 'cp' command to work on Macs
+* Fix '_decompose-project-root' bats tests for Mac
 * Fix 'chmod --reference' issue for both Mac and Linux
 * Initially created CHANGELOG.
