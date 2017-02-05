@@ -181,7 +181,7 @@ decompose-init-command() {
   fi
 
   # Copy skeleton to working directory
-  cp -rL .decompose/environment/skel/. ./
+  cp -RL .decompose/environment/skel/. ./
 
   # Add skeleton submodules
   if [ -f .decompose/environment/skel-submodules.csv ]; then
