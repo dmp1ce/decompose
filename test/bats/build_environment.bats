@@ -8,12 +8,14 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 @test "'WORKING' variable is setup" {
   echo "$WORKING"
   [ "$WORKING" ]
-  [[ $WORKING == /tmp/* ]]
+  # Typically $WORKING should be set to /tmp on Linux or /var on Macs
+  [[ $WORKING == /tmp/* || $WORKING == /var/* ]]
 }
 @test "'HOME' variable is setup" {
   echo "$HOME"
   [ "$HOME" ]
-  [[ $HOME == /tmp/* ]]
+  # Typically $WORKING should be set to /tmp on Linux or /var on Macs
+  [[ $HOME == /tmp/* || $WORKING == /var/* ]]
 }
 @test "git initialized in setup" {
   local tmpdir=$(echo_tmpdir)
@@ -21,7 +23,9 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
   run git -C "$git_url" config --list
   echo "$output"
   [ ${#lines[@]} -gt 3 ]
-  [ ${lines[4]} == "user.email=tester@example.com" ]
+  run git -C "$git_url" config --get user.email
+  echo "${lines}"
+  [ ${lines[0]} == "tester@example.com" ]
 }
 
 @test "decompose runs with no error (if no parameter is giving)" {
