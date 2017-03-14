@@ -29,7 +29,7 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 }
 
 @test "decompose runs with no error (if no parameter is giving)" {
-  run decompose
+  run $DECOMPOSE
 
   echo "$output"
   [ "$status" -eq 0 ]
@@ -37,14 +37,14 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 
 @test "'decompose --build' outputs no errors" {
   local error_output=$(cd $WORKING && \
-    decompose --build 2>&1 1>/dev/null)
+    $DECOMPOSE --build 2>&1 1>/dev/null)
   echo "$error_output"
   [ -z "$error_output" ]
 }
 
 @test "'decompose --build' creates files" {
   cd $WORKING
-  decompose --build
+  $DECOMPOSE --build
 
   [ -e "$WORKING/testing" ]
 }
@@ -55,13 +55,13 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 
 @test "'decompose --build' returns 0 error code" {
   cd $WORKING
-  run decompose --build
+  run $DECOMPOSE --build
   [ "$status" -eq 0 ]
 }
 
 @test "'decompose --build' doesn't processes ignored files" {
   cd $WORKING
-  run decompose --build
+  run $DECOMPOSE --build
   
   [ ! -e "$WORKING/ignore_me/a_file" ]
 }
@@ -73,7 +73,7 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 
   echo "$HOME"
   cd "$WORKING" 
-  run decompose --init "$environment_dir"
+  run $DECOMPOSE --init "$environment_dir"
 
   echo "$output"
   [ "$status" -ne 0 ]
@@ -87,7 +87,7 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
   local tmpdir=$(echo_tmpdir)
   local environment_dir="$tmpdir/build-test-environment"
 
-  run decompose --init "$environment_dir"
+  run $DECOMPOSE --init "$environment_dir"
  
   echo "$output"
   [ "$status" -ne 0 ] 
@@ -97,7 +97,7 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 @test "Returns error code of the process" {
   cd "$WORKING"
 
-  run decompose failed_process
+  run $DECOMPOSE failed_process
 
   echo "$output"
   [ "$status" -eq 1 ]
@@ -106,7 +106,7 @@ load "$BATS_TEST_DIRNAME/bats_functions.bash"
 @test "Missing process return error code of 1" {
   cd "$WORKING"
 
-  run decompose missing_process
+  run $DECOMPOSE missing_process
 
   echo "$output"
   [ "$status" -eq 1 ]

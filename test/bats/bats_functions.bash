@@ -24,7 +24,7 @@ function _initialize_environment() {
 
   # Init build and initialize environment
   local error_output=$(export HOME=$HOME && cd $WORKING && \
-    decompose --init "$git_url" 2>&1 1>/dev/null)
+    $DECOMPOSE --init "$git_url" 2>&1 1>/dev/null)
   if [ -n "$error_output" ]; then
     echo "'decompose --init' had errors"
     echo "$error_output"
@@ -71,6 +71,9 @@ function setup() {
   # Set current working directory
   export WORKING="$tmpdir/build-test"
   mkdir -p "$tmpdir/build-test"
+
+  # Set decompose alias
+  export DECOMPOSE=$(realpath "$BATS_TEST_DIRNAME/../../decompose")
 
   initialize_environment
 }
