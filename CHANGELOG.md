@@ -9,6 +9,7 @@ The change log is available [on GitHub][2].
 
 ## v0.18.1
 
+* Fix MacOS bash completion
 * Fix some bats tests to work on Macs
 * Fix 'cp' command to work on Macs
 * Fix '_decompose-project-root' bats tests for Mac
