@@ -67,12 +67,24 @@ _decompose-process-names() {
   done
 }
 
+# Homebrew on Macs have version 1.3 of bash-completion which doesn't include
+# _init_completion. This is a very minimal version of that function.
+__my_init_completion()
+{
+   COMPREPLY=()
+    _get_comp_words_by_ref cur prev words cword
+}
+
 # main
 # For help:
 # http://stackoverflow.com/questions/14513571/how-to-enable-default-file-completion-in-bash
 _decompose_complete() {
   local cur prev words cword
-  _init_completion || return
+  if declare -F _init_completions >/dev/null 2>&1; then
+    _init_completion || return
+  else
+    __my_init_completion || return
+  fi
 
   local processes=$(_decompose-process-names)
   local commands="--init --update --build --clean --version --help"
