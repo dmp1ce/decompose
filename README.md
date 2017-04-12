@@ -32,6 +32,10 @@ The following is required:
 
 Install using the [AUR package here](https://aur.archlinux.org/packages/decompose-git/).
 
+### MacOS
+
+Using [Homebrew](https://brew.sh/) and the [UpgradeYa tap](https://github.com/upgradeya/homebrew-upgradeya) run `brew install upgradeya/upgradeya/decompose`.
+
 ## Usage
 
 ```
